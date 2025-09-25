@@ -278,3 +278,5 @@ FinScore Analyzer now uses Supabase as the backend (PostgreSQL managed by Supaba
 - Host the Next.js app on your preferred platform (e.g., Vercel, Netlify, or Node server)
 - Configure the same Supabase env vars in your hosting provider
 - Manage database schema and policies from the Supabase Dashboard
+#   F i n s c o r e - A n a l y z e r  
+ 
