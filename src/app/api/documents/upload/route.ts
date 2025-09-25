@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
-      // Insert metadata into documents table
-      const { error: dbError } = await supabase.from('documents').insert({
+      // Insert metadata into documents table and return inserted ID
+      const { data: inserted, error: dbError } = await supabase.from('documents').insert({
         user_id: userId,
         filename: file.name,
         file_type: file.type || 'application/octet-stream',
@@ -73,13 +73,13 @@ export async function POST(req: NextRequest) {
         display_name: fileDisplay,
         account_label: fileAccount,
         processing_status: 'pending',
-      })
+      }).select('id').single()
       if (dbError) {
         return NextResponse.json({ error: dbError.message }, { status: 500 })
       }
       // Create a short-lived signed URL for convenience
       const { data: signed } = await supabase.storage.from(bucketName).createSignedUrl(filePath, 60 * 60)
-      uploaded.push({ path: filePath, url: signed?.signedUrl, docType, passwordProvided: !!password, display_name: fileDisplay, account_label: fileAccount })
+      uploaded.push({ id: inserted?.id, path: filePath, url: signed?.signedUrl, docType, passwordProvided: !!password, display_name: fileDisplay, account_label: fileAccount })
     }
 
     return NextResponse.json({ ok: true, uploaded })

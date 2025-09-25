@@ -1,0 +1,54 @@
+version: "1.0"
+linter: jetbrains/qodana-js:latest
+
+exclude:
+  - "node_modules"
+  - ".next"
+  - "dist"
+  - "build"
+  - "coverage"
+  - "test-results"
+  - "playwright-report"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/*.d.ts"
+  - "e2e"
+  - "tests"
+  - "tests-examples"
+  - "cloud-sql-proxy.exe"
+  - "qodana.yaml"
+  - "PRODUCT_ROADMAP.md"
+  - "README.md"
+  - "sample-bank-statement.csv"
+  - "setup-supabase-schema.js"
+  - "supabase_schema_bank_accounts.sql"
+  - "supabase_schema.sql"
+  - "supabase_storage.sql"
+  - ".env.*"
+  - ".gitignore"
+  - ".eslintrc.json"
+  - "jest.config.js"
+  - "jest.setup.js"
+  - "middleware.ts"
+  - "next-env.d.ts"
+  - "next.config.js"
+  - "package-lock.json"
+  - "package.json"
+  - "postcss.config.js"
+  - "tailwind.config.js"
+  - "tsconfig.json"
+  - "tsconfig.tsbuildinfo"
+  - "vitest.config.ts"
+  - ".git"
+  - ".github"
+  - ".idea"
+  - ".vscode"
+
+profile:
+  name: qodana.recommended
+
+failThreshold:
+  newProblems: 0
+  critical: 5
+  high: 10
+  total: 100

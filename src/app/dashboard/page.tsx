@@ -219,16 +219,14 @@ export default function Dashboard() {
           >
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FileUpload onUpload={handleUpload} />
-
               <button onClick={() => setWizardOpen(true)} className="block w-full text-left">
                 <GlassMorphismCard className="p-6 hover:bg-green-50/50 transition-all cursor-pointer group">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                       <BarChart3 className="w-8 h-8 text-white" />
                     </div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Generate Report</h4>
-                    <p className="text-gray-600">Create comprehensive financial analysis reports</p>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Create New Report</h4>
+                    <p className="text-gray-600">Upload documents and generate advanced financial analysis</p>
                   </div>
                 </GlassMorphismCard>
               </button>

@@ -156,33 +156,7 @@ export default function CreateReportWizard({ open, onClose, onDone }: Props) {
                         )}
                       </div>
                     </div>
-                    <FileUpload onUpload={handleUploadCapture(idx)} />
-                    {acct.files.length > 0 ? (
-                      <div className="mt-3 overflow-x-auto">
-                        <table className="min-w-full text-sm bg-white rounded border border-gray-200">
-                          <thead>
-                            <tr className="text-left text-gray-600">
-                              <th className="py-2 px-3">SNo</th>
-                              <th className="py-2 px-3">File Name</th>
-                              <th className="py-2 px-3">File Status</th>
-                              <th className="py-2 px-3">File Authenticity</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {acct.files.map((f: File, i: number) => (
-                              <tr key={i} className="border-t border-gray-100">
-                                <td className="py-2 px-3">{i + 1}</td>
-                                <td className="py-2 px-3">{f.name}</td>
-                                <td className="py-2 px-3 text-gray-600">Pending Upload</td>
-                                <td className="py-2 px-3 text-gray-600">-</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm mt-2">No files uploaded</p>
-                    )}
+                    <FileUpload onUpload={(files: File[], password?: string) => handleUploadCapture(idx)(files, password)} />
                   </div>
                 ))}
                 <button onClick={addAccount} className="px-3 py-2 border rounded">+ Add new account</button>
