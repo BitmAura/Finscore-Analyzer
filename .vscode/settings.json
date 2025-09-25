@@ -8,5 +8,29 @@
     "postcss": "css"
   },
   "tailwindCSS.emmetCompletions": true,
-  "tailwindCSS.experimental.configFile": "tailwind.config.js"
+  "tailwindCSS.experimental.configFile": "tailwind.config.js",
+  "sqltools.connections": [
+    {
+      "name": "FinScore PostgreSQL",
+      "driver": "PostgreSQL",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "database": "finscore_db",
+      "username": "postgres",
+      "askForPassword": true,
+      "connectionTimeout": 10
+    },
+    {
+      "name": "FinScore Docker PostgreSQL",
+      "driver": "PostgreSQL",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "database": "finscore_db",
+      "username": "postgres",
+      "password": "postgres",
+      "connectionTimeout": 10
+    }
+  ]
 }

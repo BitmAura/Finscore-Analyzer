@@ -1,6 +1,14 @@
-# FinScore Analyzer - Advanced Financial Document Analysis SaaS
+# FinScore Analyzer - Financial Document Analysis SaaS
 
-**A comprehensive, AI-powered financial document analysis platform built with Next.js 15, TypeScript, and Supabase.**
+**A focused, practical SaaS platform for analyzing bank statements and financial documents with speed and accuracy.**
+
+## 🎯 Current Status: DATABASE COMPLETE ✅
+
+- ✅ **Backend**: Supabase (PostgreSQL) configured
+- ✅ **Authentication**: Google & LinkedIn OAuth implemented  
+- ✅ **Modern UI**: Advanced React components with Framer Motion
+- ✅ **Demo Account**: demo@finscore.com / demo123
+- ✅ **Production Ready**: Complete backend infrastructure
 
 ## 🚀 Overview
 
@@ -32,42 +40,69 @@ FinScore Analyzer is a professional SaaS platform designed specifically for fina
 - **Zero-Knowledge Architecture** - Documents processed without storing
 - **Compliance Ready** - SOC 2, GDPR, PCI DSS compliant
 
-### 🤖 **AI-Powered Intelligence**
+### 🤖 **Smart Processing**
 - **OCR & Document Parsing** - Extract data from scanned and digital documents
 - **Fraud Detection** - Machine learning algorithms for suspicious activity
-- **Predictive Analytics** - Cash flow forecasting and risk predictions
+- **Risk Assessment** - Automated credit scoring and risk analysis
 - **Multi-Language Support** - Process documents in multiple languages
 
 ## 🛠️ Technology Stack
 
 - **Frontend:** Next.js 15, React 18, TypeScript
 - **Styling:** Tailwind CSS, Framer Motion, Radix UI
-- **Backend:** Supabase (Database, Auth, Storage)
+- **Backend:** Supabase (PostgreSQL)
 - **Document Processing:** PDF-lib, Tesseract.js, XLSX
 - **Charts:** Recharts, Chart.js
-- **Authentication:** Supabase Auth with social logins
-- **Deployment:** Vercel (Frontend), Supabase (Backend)
+- **Authentication:** Custom JWT authentication with bcrypt password hashing
+- **Deployment:** Vercel, Netlify, or any Node hosting + Supabase (Database)
 
 ## 📁 Project Structure
 
 ```
 finscore-analyser/
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── demo/              # Demo report showcase
-│   │   ├── globals.css        # Global styles
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Landing page
-│   └── components/
-│       └── reports/           # Report components
-│           └── ComprehensiveReport.tsx
-├── public/                    # Static assets
-├── .github/                   # GitHub configs and workflows
+│   ├── app/                          # Next.js App Router
+│   │   ├── api/                      # API Routes
+│   │   │   └── analyze/route.ts      # Document analysis API
+│   │   ├── demo/                     # Demo report showcase
+│   │   ├── globals.css               # Global styles
+│   │   ├── layout.tsx                # Root layout
+│   │   └── page.tsx                  # Landing page
+│   ├── components/
+│   │   └── reports/                  # Report components
+│   │       └── ComprehensiveReport.tsx
+│   ├── hooks/
+│   │   └── useFinancialAnalysis.ts   # React hooks for analysis
+│   └── lib/
+│       ├── financial-analyzer/       # Core analysis engine
+│       │   └── index.ts             # Main analyzer
+│       └── services/                 # Service layer
+│           └── index.ts             # SaaS services
+├── public/                          # Static assets
+├── .github/                         # GitHub configs and workflows
 ├── package.json              # Dependencies and scripts
 ├── tailwind.config.js        # Tailwind configuration
 ├── tsconfig.json             # TypeScript configuration
 └── next.config.js            # Next.js configuration
 ```
+
+## 🏗️ **Simple, Focused Architecture**
+
+Unlike over-engineered AI systems, FinScore uses a clean, focused architecture:
+
+### Core Components:
+- **Financial Analyzer** (`src/lib/financial-analyzer/`) - Core document processing and analysis
+- **Service Layer** (`src/lib/services/`) - Business logic and API management
+- **API Routes** (`src/app/api/`) - Simple REST endpoints for upload and analysis
+- **React Hooks** (`src/hooks/`) - Easy-to-use frontend integration
+- **Report Components** (`src/components/reports/`) - Professional report generation
+
+### Key Benefits:
+✅ **Simple to Understand** - No complex AI orchestration  
+✅ **Fast Development** - Straightforward codebase  
+✅ **Easy Maintenance** - Minimal dependencies  
+✅ **Reliable Performance** - Focused on core functionality  
+✅ **Cost Effective** - Optimized for SaaS business model
 
 ## 🚀 Getting Started
 
@@ -215,20 +250,31 @@ npm run deploy       # Deploy to production
 
 *Transforming financial document analysis, one report at a time.*
 
-## Supabase Setup (Quick)
+## Supabase Setup
 
-1) Environment
-- Create a `.env.local` with:
-   - `NEXT_PUBLIC_SUPABASE_URL=<your_url>`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_anon_key>`
-   - Optional: `SUPABASE_SERVICE_ROLE_KEY=<your_service_role_key>` (server-only)
+FinScore Analyzer now uses Supabase as the backend (PostgreSQL managed by Supabase).
 
-2) Storage
-- In Supabase Dashboard → Storage → Create bucket → name `documents` (private)
+### Quick Start (Development)
 
-3) Database (via VS Code Supabase extension)
-- Open the Supabase panel → SQL Editor → paste and run `supabase/sql/001_init_documents.sql`
+1) Environment - Copy `.env.example` to `.env.local` and set:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   # Server-side only (do not expose on client)
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=replace-with-a-strong-secret
+   ```
 
-4) Verify
-- Visit `http://localhost:3000/api/health` (should show ok: true)
-- Go to `/dashboard` and upload a small PDF/XLS/XLSX
+2) Start the app:
+   ```bash
+   npm run dev
+   ```
+
+3) That's it — all database access is handled by Supabase. Use the Supabase Dashboard → SQL editor or migrations to manage your schema.
+
+### Production Deployment
+
+- Host the Next.js app on your preferred platform (e.g., Vercel, Netlify, or Node server)
+- Configure the same Supabase env vars in your hosting provider
+- Manage database schema and policies from the Supabase Dashboard

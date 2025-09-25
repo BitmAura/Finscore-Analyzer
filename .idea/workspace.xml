@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cca71067-fec2-4115-931f-5148c377286b" name="Changes" comment="Add initial implementation of HDFC transaction parser and related components">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.local" beforeDir="false" afterPath="$PROJECT_DIR$/.env.local" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/finscore-analyser.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_databinding_databinding_common_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_databinding_databinding_compiler_common_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_databinding_baseLibrary_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_signflinger_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_analytics_library_crash_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_analytics_library_protos_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_analytics_library_shared_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_analytics_library_tracker_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_annotations_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_aapt2_proto_8_11_0_12782657.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_aaptcompiler_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_apksig_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_apkzlib_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_builder_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_builder_model_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_builder_test_api_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_bundletool_1_18_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_gradle_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_gradle_api_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_gradle_settings_api_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_jetifier_jetifier_core_1_0_0_beta10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_jetifier_jetifier_processor_1_0_0_beta10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_manifest_merger_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_build_transform_api_2_0_0_deprecated_use_gradle_api.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_common_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_ddms_ddmlib_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_dvlib_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_layoutlib_layoutlib_api_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_lint_lint_model_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_lint_lint_typedef_remover_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_repository_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_sdk_common_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_sdklib_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_device_provider_ddmlib_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_device_provider_gradle_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_device_provider_profile_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_host_additional_test_output_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_host_apk_installer_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_host_coverage_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_host_emulator_control_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_host_logcat_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_tools_utp_android_test_plugin_result_listener_gradle_proto_31_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_zipflinger_8_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_android_annotations_4_1_1_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_api_grpc_proto_google_common_protos_2_48_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_auto_value_auto_value_annotations_1_6_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_findbugs_jsr305_3_0_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_gson_gson_2_11_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_gson_gson_2_8_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_crypto_tink_tink_1_7_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_dagger_dagger_2_28_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_errorprone_error_prone_annotations_2_30_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_errorprone_error_prone_annotations_2_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_flatbuffers_flatbuffers_java_1_12_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_failureaccess_1_0_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_failureaccess_1_0_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_guava_31_0_1_jre.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_guava_33_3_1_jre.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_listenablefuture_9999_0_empty_to_avoid_conflict_with_guava.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_j2objc_j2objc_annotations_1_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_j2objc_j2objc_annotations_3_0_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_jimfs_jimfs_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_protobuf_protobuf_java_3_25_5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_protobuf_protobuf_java_util_3_25_5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_testing_platform_core_proto_0_0_9_alpha03.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_googlecode_juniversalchardet_juniversalchardet_1_0_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_javapoet_1_13_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_javawriter_2_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_sun_activation_javax_activation_1_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_sun_istack_istack_commons_runtime_3_0_8.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_sun_xml_fastinfoset_FastInfoset_1_2_16.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__commons_codec_commons_codec_1_11.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__commons_io_commons_io_2_16_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__commons_logging_commons_logging_1_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_api_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_context_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_core_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_inprocess_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_netty_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_protobuf_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_protobuf_lite_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_stub_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_grpc_grpc_util_1_69_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_buffer_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_http2_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_http_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_socks_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_common_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_handler_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_handler_proxy_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_resolver_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_native_unix_common_4_1_110_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_perfmark_perfmark_api_0_27_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__jakarta_activation_jakarta_activation_api_1_2_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__jakarta_xml_bind_jakarta_xml_bind_api_2_3_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__javax_annotation_javax_annotation_api_1_3_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__javax_inject_javax_inject_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__junit_junit_4_13_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_bytebuddy_byte_buddy_1_14_11.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_java_dev_jna_jna_5_6_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_java_dev_jna_jna_platform_5_6_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_sf_jopt_simple_jopt_simple_4_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_sf_kxml_kxml2_2_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_commons_commons_compress_1_21.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_httpclient_4_5_14.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_httpcore_4_4_16.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_httpmime_4_5_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_assertj_assertj_core_3_25_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_bitbucket_b_c_jose4j_0_9_5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_bouncycastle_bcpkix_jdk18on_1_79.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_bouncycastle_bcprov_jdk18on_1_79.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_bouncycastle_bcutil_jdk18on_1_79.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_checkerframework_checker_qual_3_12_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_checkerframework_checker_qual_3_43_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_codehaus_mojo_animal_sniffer_annotations_1_24.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_glassfish_jaxb_jaxb_runtime_2_3_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_glassfish_jaxb_txw2_2_3_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_hamcrest_hamcrest_core_1_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jdom_jdom2_2_0_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_annotations_13_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_annotations_23_0_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_fus_statistics_gradle_plugin_gradle85_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_build_statistics_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_build_tools_api_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_compiler_runner_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_daemon_client_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_annotations_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_api_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_api_gradle85_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_gradle85_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_idea_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_idea_proto_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_gradle_plugin_model_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_klib_commonizer_api_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_native_utils_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_reflect_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk7_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk8_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_tooling_core_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_util_io_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_util_klib_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_util_klib_metadata_2_1_20.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm_1_8_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jvnet_staxex_stax_ex_1_8_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_ow2_asm_asm_9_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_ow2_asm_asm_analysis_9_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_ow2_asm_asm_commons_9_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_ow2_asm_asm_tree_9_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_ow2_asm_asm_util_9_7_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_slf4j_slf4j_api_1_7_30.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_tensorflow_tensorflow_lite_metadata_0_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/app-build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/app-build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/build-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/.previewinfo" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/.previewinfo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/.rscinfo" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/.rscinfo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/.tsbuildinfo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/next-devtools-config.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/next-devtools-config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/0.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/0.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/1.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/1.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/index.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/index.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/index.pack.gz.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development-fallback/index.pack.gz.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/0.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/0.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/1.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/1.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/10.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/10.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/11.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/11.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/12.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/12.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/13.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/13.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/14.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/14.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/2.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/2.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/3.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/3.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/4.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/4.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/5.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/5.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/6.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/6.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/7.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/7.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/8.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/8.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/9.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/9.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/index.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/index.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-development/index.pack.gz.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-development/index.pack.gz.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/0.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/1.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/10.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/11.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/12.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/13.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/14.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/15.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/16.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/17.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/18.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/19.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/2.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/2.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/20.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/21.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/22.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/23.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/24.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/25.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/26.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/27.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/28.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/29.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/3.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/4.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/4.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/5.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/6.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/7.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/8.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/9.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/client-production/index.pack.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/0.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/edge-server-production/index.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/0.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/0.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/1.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/1.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/10.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/10.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/11.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/11.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/12.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/12.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/13.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/13.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/14.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/14.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/15.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/15.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/16.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/16.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/17.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/17.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/18.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/18.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/2.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/2.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/3.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/3.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/4.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/4.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/5.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/5.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/6.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/6.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/7.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/7.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/8.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/8.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/9.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/9.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/index.pack.gz" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/index.pack.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-development/index.pack.gz.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-development/index.pack.gz.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/0.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/1.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/10.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/11.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/12.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/13.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/14.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/15.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/16.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/17.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/18.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/19.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/2.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/2.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/20.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/21.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/22.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/23.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/24.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/25.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/26.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/27.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/28.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/29.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/3.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/30.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/31.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/4.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/5.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/6.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/7.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/8.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/9.pack" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/.next/cache/webpack/server-production/index.pack.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/prerender-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/prerender-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/react-loadable-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/react-loadable-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/routes-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/routes-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app-paths-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/recent/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/recent/route_client-reference-manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/stats/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/stats/route_client-reference-manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/upload/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/api/documents/upload/route_client-reference-manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/auth/page.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/auth/page_client-reference-manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/dashboard/page.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/dashboard/page_client-reference-manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/app/page_client-reference-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware-build-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware-build-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/middleware-react-loadable-manifest.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/middleware-react-loadable-manifest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/server-reference-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/server-reference-manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/@supabase.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/vendor-chunks/@supabase.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/framer-motion.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/lucide-react.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/next.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/vendor-chunks/next.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/react-intersection-observer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/tr46.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/vendor-chunks/tr46.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/webidl-conversions.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/vendor-chunks/webidl-conversions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/vendor-chunks/whatwg-url.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/vendor-chunks/whatwg-url.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/server/webpack-runtime.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/server/webpack-runtime.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app-pages-internals.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/chunks/app-pages-internals.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/api/documents/recent/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/api/documents/stats/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/api/documents/upload/route.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/auth/page.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/dashboard/page.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/layout.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/chunks/app/layout.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/app/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/chunks/app/page.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/main-app.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/chunks/main-app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/chunks/webpack.js" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/chunks/webpack.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/css/app/layout.css" beforeDir="false" afterPath="$PROJECT_DIR$/.next/static/css/app/layout.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/0efd922d8513b904.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/1610674b2e4152f5.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/8b58f7fe6e785041.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/8fba9bc36a512a41.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/a73ba17d9d0f8803.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/ad7a68bf59368b46.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/app/layout.1610674b2e4152f5.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/app/layout.8b58f7fe6e785041.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/app/layout.ad7a68bf59368b46.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/e38271bd225bf637.webpack.hot-update.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.0efd922d8513b904.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.1610674b2e4152f5.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.8b58f7fe6e785041.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.8fba9bc36a512a41.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.a73ba17d9d0f8803.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.ad7a68bf59368b46.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/static/webpack/webpack.e38271bd225bf637.hot-update.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/trace" beforeDir="false" afterPath="$PROJECT_DIR$/.next/trace" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/app/api/documents/recent/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/app/api/documents/stats/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/app/api/documents/upload/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/app/auth/page.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/app/dashboard/page.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/routes.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/.next/types/routes.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.next/types/validator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/.next/types/validator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DEVELOPMENT_PROGRESS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/advanced-financial-analysis-schema.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth-test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-sql-setup.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/create-core-tables.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/create-tables.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/create-users-table.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db-connection-test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/debug-cloud-sql-proxy.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/execute-schema.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/final-db-test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find-connection-string.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/inspect-database.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jetbrains-individual-sql-statements.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/list-databases.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/001_create_users_table.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/print-db-info.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-individual-migration.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-migrations.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-migrations.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-sql-schema.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup-database.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simplified-schema.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql-commands-for-cloud-console.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/supabase_schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/supabase_schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/supabase_schema_bank_accounts.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/supabase_schema_bank_accounts.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/supabase_storage.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/supabase_storage.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/analytics/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/analytics/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/[id]/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/delete/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/process/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/recent/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/stats/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/documents/upload/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/health/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/reports/[id]/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/reports/attach/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/reports/create/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/reports/list/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/v1/analysis/bank-statement/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/v1/analysis/bank-statement/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/v1/analysis/bank-statement/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/v1/analysis/bank-statement/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/callback/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/callback/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/auth/callback/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/auth/signin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/auth/signin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/dashboard/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/demo/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/documents/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/my-reports/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/my-reports/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reports/[id]/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reports/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/upload-documents/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/animations/MobileAnimations.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/auth/AuthModal.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/auth/ProtectedRoute.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/dashboard/CreateNewReportModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/dashboard/CreateNewReportModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/dashboard/NewAnalysisModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/dashboard/NewAnalysisModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layout/ConditionalLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/ConditionalLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/reports/ComprehensiveReport.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/reports/CreateReportWizard.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/reports/ProReportPage.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useAuth.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/analysis/bank.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/analysis/gst.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/supabase-client.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/supabase-helpers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/supabase-helpers.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/supabase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/supabase.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/supabaseServer.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssl-db-test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/start-cloud-sql-proxy.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/cli-latest" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/gotrue-version" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/pooler-url" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/postgres-version" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/project-ref" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/rest-version" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/.temp/storage-version" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/config.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/sql/001_init_documents.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/sql/002_storage_documents.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/sql/003_analysis.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/sql/004_documents_labels.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/sql/005_reports.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-db-connection.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-direct-connection.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/verify-database.js" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="gradle-plugin-root" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;state&quot;: &quot;OPEN&quot;,
+      &quot;assignee&quot;: &quot;BitmAura&quot;,
+      &quot;author&quot;: &quot;BitmAura&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;BitmAura&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:BitmAura/Finscore-Analyzer.git&quot;,
+    &quot;accountId&quot;: &quot;e9ca2251-76ee-47cc-9985-d16108c443b7&quot;
+  }
+}</component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin" gradleHome="C:\Users\Electronics Edge\.gradle\wrapper\dists\gradle-8.14.3-bin\cv11ve7ro1n3o1j4so8xd9n66\gradle-8.14.3" javaHome="C:\Users\Electronics Edge\.jdks\corretto-24.0.2" gradleVersion="8.14.3" />
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/app/login/page.tsx" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="33398pHIu2CHhBuU7RsyeLRp4sD" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;JavaScript Debug.Next.js: debug client-side.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/finscore-analyser&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.Next.js: server-side.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\IntelliJ IDEA 2025.2.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
+  }
+}</component>
+  <component name="QodanaCIConfigService">
+    <option name="path" value="$PROJECT_DIR$/.github/workflows/qodana_code_quality.yml" />
+  </component>
+  <component name="QodanaCloudProjectLink">
+    <option name="linkedProjectId" value="Q69bD" />
+    <option name="linkedProjectName" value="My first project" />
+    <option name="organizationId" value="Q6qLQ" />
+    <option name="userId" value="GrQVY" />
+  </component>
+  <component name="QodanaHighlightedReportService">
+    <option name="localRunNotPublishedPersistedInfo">
+      <LocalReportPersistedInfo>
+        <option name="path" value="C:\Users\ELECTR~1\AppData\Local\Temp\qodana_output\qodana.sarif.json" />
+        <option name="reportGuid" value="09f700a6-cef3-4b6a-b972-58522d7075e9" />
+        <option name="reportName" value="finscore-analyser/qodana/2025-09-25" />
+      </LocalReportPersistedInfo>
+    </option>
+  </component>
+  <component name="QodanaIsSelectedPersistenceService">
+    <option name="selectedOrLoading" value="true" />
+  </component>
+  <component name="QodanaReportsService">
+    <option name="descriptions">
+      <ReportDescription localRun="true" path="C:\Users\ELECTR~1\AppData\Local\Temp\qodana_output\qodana.sarif.json" reportGuid="09f700a6-cef3-4b6a-b972-58522d7075e9" reportId="finscore-analyser/qodana/2025-09-25" />
+    </option>
+  </component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cca71067-fec2-4115-931f-5148c377286b" name="Changes" comment="" />
+      <created>1758534733300</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1758534733300</updated>
+      <workItem from="1758534751618" duration="1105000" />
+      <workItem from="1758536012427" duration="337000" />
+      <workItem from="1758537147648" duration="4900000" />
+      <workItem from="1758545048224" duration="16974000" />
+      <workItem from="1758620830679" duration="24301000" />
+      <workItem from="1758684841141" duration="6321000" />
+      <workItem from="1758694905181" duration="16698000" />
+      <workItem from="1758713561992" duration="1822000" />
+      <workItem from="1758715492820" duration="2101000" />
+      <workItem from="1758720966658" duration="2585000" />
+      <workItem from="1758725529726" duration="3520000" />
+      <workItem from="1758729993782" duration="2312000" />
+      <workItem from="1758732413304" duration="395000" />
+      <workItem from="1758771990825" duration="4373000" />
+      <workItem from="1758776639407" duration="220000" />
+      <workItem from="1758776889686" duration="11884000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+    <option name="exactExcludedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/playwright.config.js" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
