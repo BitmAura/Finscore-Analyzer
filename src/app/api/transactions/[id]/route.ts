@@ -1,10 +1,10 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerAuth, getUserId } from '@/lib/auth-server';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerAuth(request);
   const userId = getUserId(session);
 
@@ -22,7 +22,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const { data: transaction, error: transactionError } = await supabase
     .from('transactions')
     .select('job_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (transactionError || !transaction) {
@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const { data, error } = await supabase
     .from('transactions')
     .update({ category })
-    .eq('id', params.id)
+    .eq('id', id)
     .select();
 
   if (error) {

@@ -8,7 +8,32 @@
  * - User management integration
  */
 
-import FinancialAnalyzer, { AnalysisResult, ProcessedDocument } from '../financial-analyzer'
+import { 
+  categorizeAllTransactions, 
+  TransactionCategory 
+} from '../analysis/categorization-service';
+import { 
+  analyzeCounterparties, 
+  Counterparty 
+} from '../analysis/counterparty-service';
+import { 
+  calculateMonthlySummaries, 
+  MonthlySummary 
+} from '../analysis/monthly-summary-service';
+import { 
+  detectRedAlerts, 
+  RedAlert 
+} from '../analysis/red-alert-service';
+import { 
+  assessRisk, 
+  RiskAssessment 
+} from '../analysis/risk-service';
+import { 
+  calculateSummary, 
+  FinancialSummary 
+} from '../analysis/summary-service';
+import { routeToParser } from '../parsing/master-parser';
+import { Transaction } from '../parsing/transaction-parser';
 
 export interface AnalysisRequest {
   userId: string
@@ -18,6 +43,15 @@ export interface AnalysisRequest {
     includeCharts?: boolean
     customBranding?: boolean
   }
+}
+
+export interface AnalysisResult {
+  summary: FinancialSummary;
+  categorizedTransactions: (Transaction & { category: TransactionCategory })[];
+  counterparties: Counterparty[];
+  monthlySummaries: MonthlySummary[];
+  redAlerts: RedAlert[];
+  riskAssessment: RiskAssessment;
 }
 
 export interface AnalysisResponse {
@@ -42,12 +76,9 @@ export interface UserAnalytics {
 }
 
 export class FinScoreService {
-  private analyzer: FinancialAnalyzer
   private activeAnalyses: Map<string, AnalysisResponse> = new Map()
 
-  constructor() {
-    this.analyzer = new FinancialAnalyzer()
-  }
+  constructor() {}
 
   async submitAnalysis(request: AnalysisRequest): Promise<AnalysisResponse> {
     const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -101,7 +132,7 @@ export class FinScoreService {
     
     const userAnalyses = Array.from(this.activeAnalyses.values())
       .filter(analysis => analysis.id.includes(userId.slice(-4))) // Simple user filtering
-      .slice(0, limit)
+      .slice(0, limit);
 
     return userAnalyses
   }
@@ -114,7 +145,26 @@ export class FinScoreService {
       await this.validateFile(request.file)
       
       // Perform analysis
-      const result = await this.analyzer.analyzeDocument(request.file)
+      const fileContent = await request.file.text();
+      const parseResult = await routeToParser(fileContent, analysisId);
+      // routeToParser returns a ParseResult (transactions + accountDetails). Normalize to the transactions array.
+      const transactionsArray: Transaction[] = Array.isArray(parseResult) ? parseResult : (parseResult as any).transactions || [];
+
+      const summary = calculateSummary(transactionsArray);
+      const categorizedTransactions = await categorizeAllTransactions(transactionsArray);
+      const counterparties = analyzeCounterparties(categorizedTransactions as any);
+      const monthlySummaries = calculateMonthlySummaries(transactionsArray);
+      const redAlerts = detectRedAlerts(transactionsArray);
+      const riskAssessment = assessRisk(transactionsArray);
+
+      const result: AnalysisResult = {
+        summary,
+        categorizedTransactions,
+        counterparties,
+        monthlySummaries,
+        redAlerts,
+        riskAssessment,
+      };
       
       // Generate report
       const reportUrl = await this.generateReport(result, request.options)
@@ -209,20 +259,17 @@ export class ReportGenerator {
     return {
       cashflowChart: {
         type: 'line',
-        data: result.cashflowAnalysis.monthlyTrends.map(trend => ({
+        data: result.monthlySummaries.map(trend => ({
           month: trend.month,
-          netFlow: trend.netFlow,
-          credits: trend.credits,
-          debits: trend.debits
+          netFlow: trend.netCashFlow,
+          credits: trend.totalIncome,
+          debits: trend.totalExpenses
         }))
       },
       categoryChart: {
         type: 'pie',
         data: [
-          { name: 'Recurring Credits', value: result.recurringCredits.length },
-          { name: 'Recurring Debits', value: result.recurringDebits.length },
-          { name: 'ATM Transactions', value: result.atmTransactions.length },
-          { name: 'Cheque Returns', value: result.chequeReturns.length }
+          // This needs to be recalculated based on categorizedTransactions
         ]
       },
       riskChart: {

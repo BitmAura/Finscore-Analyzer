@@ -4,6 +4,13 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+
+  // In development, skip middleware redirects so client-side session initialization
+  // can complete and we can debug navigation without server-side redirects interfering.
+  if (process.env.NODE_ENV !== 'production') {
+    return res;
+  }
+
   const supabase = createMiddlewareClient({ req, res });
 
   const {

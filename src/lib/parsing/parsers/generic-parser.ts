@@ -15,7 +15,7 @@ const parseAmount = (amount?: string | null): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-export const parse = (text: string): Transaction[] => {
+export const parse = (text: string, job_id: string): Transaction[] => {
   const transactions: Transaction[] = [];
   const lines = text.split('\n');
 
@@ -27,6 +27,7 @@ export const parse = (text: string): Transaction[] => {
     if (match && match.groups) {
       const { date, desc, debit, credit, balance } = match.groups;
       transactions.push({
+        job_id,
         date: date,
         description: (desc || '').trim(),
         debit: parseAmount(debit ?? null),

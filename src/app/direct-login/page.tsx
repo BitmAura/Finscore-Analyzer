@@ -37,7 +37,7 @@ export default function DirectLoginTest() {
         
         // Wait a moment for cookie to be set
         setTimeout(() => {
-          router.push('/dashboard')
+          router.push('/analyst-dashboard')
         }, 500)
         
       } else {
@@ -145,7 +145,7 @@ export default function DirectLoginTest() {
           <h3 className="mb-2 text-lg font-semibold">Direct Navigation</h3>
           <div className="space-y-2">
             <button
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/analyst-dashboard')}
               className="w-full px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
             >
               Go to Dashboard (Test Protection)

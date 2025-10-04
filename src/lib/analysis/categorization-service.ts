@@ -13,53 +13,47 @@ export type TransactionCategory =
   | 'Transfers'
   | 'Other';
 
-// A dictionary of keywords to identify categories. This is the core of the rule-based engine.
-const categoryKeywords: { [key in TransactionCategory]: string[] } = {
-  'Food & Drink': ['ZOMATO', 'SWIGGY', 'RESTAURANT', 'CAFE', 'FOODPANDA', 'DOMINOS', 'PIZZA HUT', 'MCDONALDS'],
-  'Shopping': ['AMAZON', 'FLIPKART', 'MYNTRA', 'SHOPPERS STOP', 'LIFESTYLE', 'DECATHLON', 'AJIO', 'NYKAA'],
-  'Transport': ['UBER', 'OLA', 'RAPIDO', 'METRO', 'INDIAN RAIL', 'IRCTC', 'INDIGO', 'SPICEJET', 'VISTARA'],
-  'Bills & Utilities': ['VODAFONE', 'AIRTEL', 'JIOPAY', 'BSES', 'ELECTRICITY', 'MOBILE RECHARGE', 'PAYTM', 'BILLDESK'],
-  'Entertainment': ['BOOKMYSHOW', 'PVR', 'INOX', 'NETFLIX', 'SPOTIFY', 'PRIME VIDEO', 'HOTSTAR'],
-  'Groceries': ['BIGBASKET', 'GROFERS', 'BLINKIT', 'ZEPTO', 'DMART', 'RELIANCE FRESH'],
-  'Health & Wellness': ['APOLLO PHARMACY', 'PHARMEASY', '1MG', 'CULT FIT', 'GYM'],
-  'Salary': ['SALARY', 'SAL', 'PAYROLL'],
-  'Transfers': ['IMPS', 'NEFT', 'RTGS', 'UPI', 'PAYMENT'],
-  'Other': [], // Fallback category
-};
-
 /**
- * Categorizes a single transaction based on its description.
+ * Categorizes a single transaction by calling the categorization API.
  * @param transaction The transaction to categorize.
  * @returns The determined category.
  */
-export const categorizeTransaction = (transaction: Transaction): TransactionCategory => {
-  const description = transaction.description.toUpperCase();
-  
-  // Handle transfers first as they can contain other keywords
-  if (categoryKeywords.Transfers.some(keyword => description.includes(keyword))) {
-    return 'Transfers';
-  }
+export const categorizeTransaction = async (transaction: Transaction): Promise<TransactionCategory> => {
+  try {
+    // This assumes the API endpoint is running on the same host.
+    // In a real-world scenario, you would use a full URL from an environment variable.
+    const response = await fetch('http://localhost:3000/api/categorize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description: transaction.description }),
+    });
 
-  for (const category in categoryKeywords) {
-    if (category === 'Transfers') continue; // Already handled
-
-    for (const keyword of categoryKeywords[category as TransactionCategory]) {
-      if (description.includes(keyword)) {
-        return category as TransactionCategory;
-      }
+    if (!response.ok) {
+      console.error('Categorization API call failed with status:', response.status);
+      return 'Other';
     }
+
+    const data = await response.json();
+    return data.category as TransactionCategory;
+  } catch (error) {
+    console.error('Error calling categorization API:', error);
+    return 'Other';
   }
-  return 'Other';
 };
 
 /**
- * Processes a list of transactions and adds a category to each one.
+ * Processes a list of transactions and adds a category to each one by calling the categorization API.
  * @param transactions The array of transactions.
  * @returns A new array of transactions, each with a 'category' field.
  */
-export const categorizeAllTransactions = (transactions: Transaction[]): (Transaction & { category: TransactionCategory })[] => {
-    return transactions.map(t => ({
-        ...t,
-        category: categorizeTransaction(t),
-    }));
+export const categorizeAllTransactions = async (transactions: Transaction[]): Promise<(Transaction & { category: TransactionCategory })[]> => {
+  const categorizedTransactions = await Promise.all(
+    transactions.map(async (t) => ({
+      ...t,
+      category: await categorizeTransaction(t),
+    }))
+  );
+  return categorizedTransactions;
 };

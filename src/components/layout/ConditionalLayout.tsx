@@ -3,6 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Header from '../ui/Header';
 import Sidebar from '../ui/Sidebar';
+import React from 'react';
+import { useAuthReady } from '@/contexts/AuthReadyContext';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -10,6 +12,7 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
+  const { isAuthReady } = useAuthReady();
 
   // Pages that should NOT have sidebar/header (landing page, auth pages)
   const noLayoutPages = [
@@ -25,6 +28,18 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
 
   // Check if current page should have the dashboard layout
   const shouldShowLayout = !noLayoutPages.includes(pathname);
+
+  // If this is a dashboard/protected page and auth is not yet ready, show a loading placeholder
+  if (shouldShowLayout && !isAuthReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="mb-4 animate-spin">🔄</div>
+          <p className="text-gray-600">Initializing authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // For pages without sidebar/header (landing page, auth pages)
   if (!shouldShowLayout) {

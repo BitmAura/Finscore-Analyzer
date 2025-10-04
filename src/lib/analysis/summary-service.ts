@@ -9,9 +9,16 @@ export interface FinancialSummary {
   transactionCount: number;
 }
 
-export const calculateSummary = (transactions: Transaction[]): FinancialSummary | null => {
+export const calculateSummary = (transactions: Transaction[]): FinancialSummary => {
   if (transactions.length === 0) {
-    return null;
+    return {
+      totalIncome: 0,
+      totalExpenses: 0,
+      netCashFlow: 0,
+      startBalance: 0,
+      endBalance: 0,
+      transactionCount: 0,
+    };
   }
 
   let totalIncome = 0;

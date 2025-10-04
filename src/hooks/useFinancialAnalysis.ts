@@ -38,7 +38,7 @@ export function useFinancialAnalysis(options: UseFinancialAnalysisOptions = {}):
   analysisId: string | null
 
   // Actions
-  analyzeDocuments: (files: File[], passwords: string[], userId: string, reportFormat?: 'basic' | 'comprehensive') => Promise<void>
+  analyzeDocuments: (files: File[], passwords: string[], userId: string, reportName?: string, referenceId?: string, reportType?: string, reportFormat?: 'basic' | 'comprehensive') => Promise<void>
   pollDocumentStatus: (documentIdOrAnalysisId: string) => Promise<void>
   cancelAnalysis: () => void
   reset: () => void
@@ -182,9 +182,9 @@ export function useFinancialAnalysis(options: UseFinancialAnalysisOptions = {}):
     files: File[],
     passwords: string[],
     userId: string,
-    reportName: string,
-    referenceId: string,
-    reportType: string,
+    reportName: string = 'Financial Analysis Report',
+    referenceId: string = 'N/A',
+    reportType: string = 'detailed',
     reportFormat: 'basic' | 'comprehensive' = 'comprehensive'
   ) => {
     // Reset previous aborts

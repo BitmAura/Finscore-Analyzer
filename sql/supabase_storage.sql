@@ -16,3 +16,5 @@ CREATE POLICY "Users can access their own files"
 CREATE POLICY "Users can upload their own files"
   ON storage.objects
   FOR INSERT WITH CHECK (auth.uid() = owner);
+
+-- Moved all SQL schema files from root to /sql folder for better organization

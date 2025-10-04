@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
     return (
       <div className="p-8 text-center text-gray-400">
         <h2 className="text-2xl font-bold mb-4">No Analytics Available</h2>
-        <p className="mb-2">You haven't run any analyses yet.</p>
+        <p className="mb-2">You haven&apos;t run any analyses yet.</p>
         <p>Start by uploading and analyzing a bank statement. Analytics will appear here once you have completed your first report.</p>
       </div>
     );

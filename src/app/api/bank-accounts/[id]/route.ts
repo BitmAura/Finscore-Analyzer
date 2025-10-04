@@ -1,10 +1,10 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerAuth, getUserId } from '@/lib/auth-server';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerAuth(request);
   const userId = getUserId(session);
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { data, error } = await supabase
     .from('bank_accounts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', userId)
     .single();
 
@@ -30,7 +30,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json(data);
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerAuth(request);
   const userId = getUserId(session);
 
@@ -43,7 +44,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const { data, error } = await supabase
     .from('bank_accounts')
     .update({ bank_name, account_number, account_type })
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', userId)
     .select();
 
@@ -54,7 +55,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   return NextResponse.json(data);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const session = await getServerAuth(request);
   const userId = getUserId(session);
 
@@ -65,7 +67,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   const { error } = await supabase
     .from('bank_accounts')
     .delete()
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', userId);
 
   if (error) {

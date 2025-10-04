@@ -1,159 +1,323 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { PlusIcon, MagnifyingGlassIcon, ArrowPathIcon, DocumentChartBarIcon, ClockIcon, CircleStackIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid';
-import CreateNewReportModal from '../../components/dashboard/CreateNewReportModal';
-import KpiCard from '../../components/dashboard/KpiCard';
-import { useFinancialAnalysis } from '../../hooks/useFinancialAnalysis';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
-
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase-client';
+import CreateNewReportModal from '@/components/dashboard/CreateNewReportModal';
 
-export default function MyReportsPage() {
+interface AnalysisJob {
+  id: string;
+  report_name: string;
+  reference_id: string;
+  report_type: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  document_name: string;
+  created_at: string;
+  completed_at?: string;
+  metadata?: {
+    fileCount?: number;
+    detectedBanks?: string[];
+    bankAccounts?: Array<{
+      bankName: string;
+      accountNumber: string;
+      accountHolder?: string;
+      startDate?: string;
+      endDate?: string;
+      currency?: string;
+    }>;
+  };
+}
+
+interface BankStatement {
+  id: string;
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  account_type: string;
+  start_date?: string;
+  end_date?: string;
+  document_id?: string;
+}
+
+const MyReportsPage: React.FC = () => {
+  const [jobs, setJobs] = useState<AnalysisJob[]>([]);
+  // store bank statements as a flat array for the user
+  const [bankStatements, setBankStatements] = useState<BankStatement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [reports, setReports] = useState<any[]>([]);
-  const [kpis, setKpis] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const { getAnalysisJobs, getKpis } = useFinancialAnalysis();
-  const { user } = useUser();
-
-  const [hoveredReportId, setHoveredReportId] = useState<string | null>(null);
+  const user = useUser();
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-        if (user?.id) {
-            const [fetchedReports, fetchedKpis] = await Promise.all([
-                getAnalysisJobs(user.id),
-                getKpis(user.id)
-            ]);
-            if (fetchedReports) setReports(fetchedReports);
-            if (fetchedKpis) setKpis(fetchedKpis);
+    const checkAuthAndFetchJobs = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login');
+          return;
         }
-    }
-    fetchData();
-  }, [user, getAnalysisJobs, getKpis]);
+        setIsLoading(true);
+        // Fetch analysis jobs
+        const { data: jobsData, error: jobsError } = await supabase.from('analyses').select('*').eq('user_id', session.user.id);
+        if (jobsError) throw jobsError;
+        setJobs(jobsData || []);
+        // Fetch uploaded documents
+        const { data: docsData, error: docsError } = await supabase.from('documents').select('*').eq('user_id', session.user.id);
+        if (docsError) throw docsError;
+        setBankStatements(docsData || []);
+        setIsLoading(false);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch reports');
+        setIsLoading(false);
+      }
+    };
+    checkAuthAndFetchJobs();
+  }, [router]);
 
-  const filteredReports = useMemo(() => {
-    return reports
-      .filter(report => statusFilter === 'all' || report.status === statusFilter)
-      .filter(report => 
-        report.report_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.reference_id.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-  }, [reports, searchTerm, statusFilter]);
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setJobs([]);
+    setBankStatements([]);
 
-  const getStatusColor = (status: string) => {
+    // Re-run the effect to fetch data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  };
+
+  const renderStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed':
+        return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completed</span>;
+      case 'processing':
+        return <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 flex items-center">
+          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-1 animate-pulse"></span>
+          Processing
+        </span>;
+      case 'pending':
+        return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
+      case 'failed':
+        return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Failed</span>;
+      default:
+        return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">{status}</span>;
     }
   };
 
-  return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <CreateNewReportModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Reports Dashboard</h1>
-          <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center space-x-2 hover:bg-blue-700"
-            >
-              <PlusIcon className="w-5 h-5" />
-              <span>New Report</span>
-            </button>
-        </div>
-
-        {kpis && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <KpiCard title="Total Reports Analyzed" value={kpis.totalReports} icon={<DocumentChartBarIcon className="w-6 h-6 text-blue-500" />} />
-                <KpiCard title="Documents Processed" value={kpis.documentsProcessed} icon={<CircleStackIcon className="w-6 h-6 text-blue-500" />} />
-                <KpiCard title="Avg. Turnaround Time" value={`${(kpis.avgTurnaroundTime / 1000).toFixed(2)}s`} icon={<ClockIcon className="w-6 h-6 text-blue-500" />} />
-                <KpiCard title="Most Common Red Flag" value={kpis.mostCommonRedFlag} icon={<ExclamationCircleIcon className="w-6 h-6 text-blue-500" />} />
-            </div>
-        )}
-
-        <div className="bg-white shadow-sm rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center space-x-4">
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search reports..."
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <select 
-                        className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="completed">Completed</option>
-                        <option value="processing">Processing</option>
-                        <option value="failed">Failed</option>
-                        <option value="pending">Pending</option>
-                    </select>
-                </div>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg flex items-center space-x-2 bg-white hover:bg-gray-100">
-                    <ArrowPathIcon className="w-5 h-5 text-gray-600" />
-                    <span>Refresh</span>
-                </button>
-            </div>
-
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Name</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference ID</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                {filteredReports.map((report) => (
-                    <tr 
-                        key={report.id}
-                        onMouseEnter={() => setHoveredReportId(report.id)}
-                        onMouseLeave={() => setHoveredReportId(null)}
-                        className="relative hover:bg-gray-50"
-                    >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline">
-                        <Link href={`/reports/${report.id}`}>{report.report_name}</Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.reference_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(report.status)}`}>
-                        {report.status}
-                        </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(report.created_at).toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">...</td>
-                    {hoveredReportId === report.id && (
-                        <div className="absolute z-10 left-full top-1/2 -translate-y-1/2 ml-4 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-                            <h3 className="font-bold text-gray-900 mb-2">Quick View: {report.report_name}</h3>
-                            <p className="text-sm text-gray-700">Status: <span className={`${getStatusColor(report.status)} px-1 rounded`}>{report.status}</span></p>
-                            {report.summary?.net_cash_flow !== undefined && (
-                                <p className="text-sm text-gray-700">Net Cash Flow: ${report.summary.net_cash_flow.toFixed(2)}</p>
-                            )}
-                            {report.risk_assessment?.score !== undefined && (
-                                <p className="text-sm text-gray-700">Risk Score: {report.risk_assessment.score}</p>
-                            )}
-                        </div>
-                    )}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <p>{error}</p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+          <p>You are not logged in. Please log in to view your reports.</p>
+        </div>
+        <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block">
+          Go to Login
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      <CreateNewReportModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleRefresh}
+      />
+
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Reports</h1>
+          <p className="text-gray-600 mt-1">View and manage your financial analysis reports</p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          New Analysis
+        </button>
+      </div>
+
+      {jobs.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-sm border p-12 text-center"
+        >
+          <svg className="w-20 h-20 text-gray-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No reports yet</h2>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            Start by creating a new financial analysis report to get insights into your bank statements.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg inline-flex items-center text-sm font-medium"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Your First Report
+          </button>
+        </motion.div>
+      ) : (
+        <div className="space-y-6">
+          {jobs.map((job, index) => (
+            <motion.div
+              key={job.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-lg shadow-sm border overflow-hidden"
+            >
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">{job.report_name}</h2>
+                      <span className="ml-3">{renderStatusBadge(job.status)}</span>
+                    </div>
+                    <div className="mt-1 text-sm text-gray-500 flex items-center">
+                      <span className="mr-3">Ref: {job.reference_id}</span>
+                      <span className="mr-3">•</span>
+                      <span>{new Date(job.created_at).toLocaleDateString()}</span>
+                      {job.completed_at && (
+                        <>
+                          <span className="mx-3">•</span>
+                          <span>Completed: {new Date(job.completed_at).toLocaleDateString()}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {job.status === 'completed' && (
+                    <Link
+                      href={`/reports/${job.id}`}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg"
+                    >
+                      View Report
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              <div className="px-6 py-4">
+                {/* Bank accounts section */}
+                <h3 className="font-medium text-gray-900 mb-3">Bank Accounts</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {job.metadata?.bankAccounts && job.metadata.bankAccounts.length > 0 ? (
+                    job.metadata.bankAccounts.map((statement, idx) => (
+                      <div key={idx} className="border rounded-lg p-4">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                            <span className="font-semibold text-blue-800">{statement.bankName?.substring(0,1)}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{statement.bankName}</p>
+                            <p className="text-sm text-gray-600">{statement.accountNumber.length > 8 ? `XXXX${statement.accountNumber.slice(-4)}` : statement.accountNumber}</p>
+                          </div>
+                        </div>
+
+                        {(statement.startDate || statement.endDate) && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            Period: {statement.startDate || 'Unknown'} to {statement.endDate || 'Unknown'}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    // Fallback: show uploaded documents (bankStatements) as available
+                    bankStatements && bankStatements.length > 0 ? (
+                      bankStatements.map((statement) => (
+                        <div key={statement.id} className="border rounded-lg p-4">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                              <span className="font-semibold text-blue-800">{statement.bank_name?.substring(0,1)}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{statement.bank_name}</p>
+                              <p className="text-sm text-gray-600">{statement.account_number ? (statement.account_number.length > 8 ? `XXXX${statement.account_number.slice(-4)}` : statement.account_number) : 'N/A'}</p>
+                            </div>
+                          </div>
+
+                          {(statement.start_date || statement.end_date) && (
+                            <div className="text-xs text-gray-500 mt-2">
+                              Period: {statement.start_date || 'Unknown'} to {statement.end_date || 'Unknown'}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full border border-dashed rounded-lg p-4 text-center text-gray-500">
+                        {job.status === 'pending' || job.status === 'processing' ? (
+                          <p>Bank account information will appear here once processing is complete.</p>
+                        ) : (
+                          <p>No bank account information available for this report.</p>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="px-6 py-4 bg-gray-50 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="text-gray-600">
+                    {job.metadata?.fileCount ? (
+                      <span>Based on {job.metadata.fileCount} uploaded document{job.metadata.fileCount !== 1 ? 's' : ''}</span>
+                    ) : (
+                      <span>{job.document_name || 'Multiple documents'}</span>
+                    )}
+                  </div>
+
+                  <div className="flex space-x-2">
+                    {job.status === 'completed' && (
+                      <Link href={`/reports/${job.id}`} className="text-blue-600 hover:text-blue-800">
+                        View Detailed Analysis
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default MyReportsPage;

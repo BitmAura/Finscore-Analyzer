@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import pdf from 'pdf-parse';
 import qpdf from 'node-qpdf';
@@ -10,6 +9,7 @@ import { calculateMonthlySummaries } from '@/lib/analysis/monthly-summary-servic
 import { categorizeAllTransactions } from '@/lib/analysis/categorization-service';
 import { analyzeCounterparties } from '@/lib/analysis/counterparty-service';
 import { assessRisk } from '@/lib/analysis/risk-service';
+import { detectSpendingTrends, detectAnomalies } from '@/lib/analysis/trend-service';
 import { saveTransactions } from '@/lib/supabase-helpers';
 import { generateExecutiveSummary } from '@/lib/ai-analysis';
 import path from 'path';
@@ -26,7 +26,7 @@ async function downloadFile(filePath: string) {
     return data.arrayBuffer();
 }
 
-export async function analyzeJob(jobId: string) {
+async function analyzeJob(jobId: string) {
     console.log(`Starting analysis for job ${jobId}`);
 
     try {
@@ -48,8 +48,8 @@ export async function analyzeJob(jobId: string) {
             try {
                 const filePath = `${job.user_id}/${job.id}/${fileName}`;
                 const arrayBuffer = await downloadFile(filePath);
-                let buffer = Buffer.from(arrayBuffer);
-                
+                let buffer = Buffer.from(arrayBuffer as ArrayBuffer);
+
                 const encryptedPassword = job.file_passwords ? job.file_passwords[index] : null;
 
                 if (encryptedPassword) {
@@ -62,11 +62,11 @@ export async function analyzeJob(jobId: string) {
 
                     await qpdf.decrypt(tempInputPath, password, tempOutputPath);
                     
-                    buffer = await fs.readFile(tempOutputPath);
+                    buffer = Buffer.from(await fs.readFile(tempOutputPath));
                 }
 
                 const data = await pdf(buffer);
-                return routeToParser(data.text);
+                return routeToParser(data.text, jobId);
             } catch (error: any) {
                 console.error(`Failed to process file: ${fileName} for job: ${jobId}`, { error: error.message, stack: error.stack });
                 return []; // Return empty array for failed files
@@ -95,9 +95,11 @@ export async function analyzeJob(jobId: string) {
         const summary = calculateSummary(allTransactions);
         const redAlerts = detectRedAlerts(allTransactions);
         const monthlySummaries = calculateMonthlySummaries(allTransactions);
-        const categorizedTransactions = categorizeAllTransactions(allTransactions);
+        const categorizedTransactions = await categorizeAllTransactions(allTransactions);
         const counterparties = analyzeCounterparties(categorizedTransactions);
         const riskAssessment = assessRisk(allTransactions);
+        const trends = detectSpendingTrends(categorizedTransactions);
+        const anomalies = detectAnomalies(allTransactions);
 
         const aiExecutiveSummary = await generateExecutiveSummary(
             summary,
@@ -117,6 +119,8 @@ export async function analyzeJob(jobId: string) {
             red_alerts: redAlerts,
             counterparties: counterparties,
             risk_assessment: riskAssessment,
+            trends: trends,
+            anomalies: anomalies,
             ai_executive_summary: aiExecutiveSummary,
         }).eq('id', jobId);
 
@@ -127,3 +131,5 @@ export async function analyzeJob(jobId: string) {
         await supabase.from('analysis_jobs').update({ status: 'failed', summary: { error: error.message } }).eq('id', jobId);
     }
 }
+
+export default analyzeJob

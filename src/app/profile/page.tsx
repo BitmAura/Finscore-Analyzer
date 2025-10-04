@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase-client'; // Updated to use the unified client
+import { supabase } from '../../lib/supabase'; // Unified client
+import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
-// import { useNotifications } from '../../contexts/NotificationContext'; // Removed notification import
 
 export default function ProfilePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -15,30 +15,33 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const router = useRouter();
-  // const { addNotification } = useNotifications(); // Removed notification hook
+  const user = useUser();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
+    const checkAuth = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (user) {
-          setUserEmail(user.email ?? null);
-          setNewEmail(user.email ?? '');
-        } else if (error) {
-          setError('Failed to fetch user data.');
-          console.error('Error fetching user:', error.message);
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthChecked(true);
+        console.debug('[Profile] session check:', session);
+        if (!session) {
+          console.debug('[Profile] No session found, redirecting to /login');
+          router.push('/login');
+          return;
         }
+        const userEmailFromSession = session?.user?.email ?? null;
+        console.debug('[Profile] user from hook:', user, 'emailFromSession:', userEmailFromSession);
+        setUserEmail(user?.email ?? userEmailFromSession);
+        setNewEmail(user?.email ?? userEmailFromSession ?? '');
       } catch (err) {
-        console.error('Error in fetchUser:', err);
-        setError('Failed to load user data.');
-      } finally {
-        setIsLoading(false);
+        setIsAuthChecked(true);
+        console.error('[Profile] error checking auth session:', err);
+        router.push('/login');
       }
     };
 
-    fetchUser().catch(console.error);
-  }, []);
+    checkAuth();
+  }, [router, user]);
 
   const handleDeleteAccount = async () => {
     setIsLoading(true);
@@ -46,26 +49,20 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      // Sign out the user first, then delete via API
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
         setError(`Error signing out: ${signOutError.message}`);
-        console.error(`Account Deletion Failed: Error signing out: ${signOutError.message}`); // Log error instead of notification
+        console.error(`Account Deletion Failed: Error signing out: ${signOutError.message}`);
         return;
       }
 
-      // Note: Account deletion should be handled by your backend API
-      // This is just a placeholder - implement proper account deletion via your API
       setMessage('Account deletion initiated. You have been signed out.');
-      console.log('Account deletion initiated. You have been signed out.'); // Log info instead of notification
-
-      // Redirect to login page
       router.push('/login');
       router.refresh();
     } catch (error: any) {
       console.error('Account deletion error:', error);
       setError(`Error deleting account: ${error.message}`);
-      console.error(`Account Deletion Failed: Error deleting account: ${error.message}`); // Log error instead of notification
+      console.error(`Account Deletion Failed: Error deleting account: ${error.message}`);
     } finally {
       setIsLoading(false);
       setShowDeleteConfirm(false);
@@ -80,7 +77,6 @@ export default function ProfilePage() {
 
     if (!newEmail || newEmail === userEmail) {
       setError('Please enter a new email address.');
-      console.error('Email Update Error: Please enter a new email address.'); // Log error instead of notification
       setIsLoading(false);
       return;
     }
@@ -89,12 +85,10 @@ export default function ProfilePage() {
 
     if (error) {
       setError(`Error updating email: ${error.message}`);
-      console.error(`Email Update Failed: Error updating email: ${error.message}`); // Log error instead of notification
       console.error('Email update error:', error);
     } else {
       setMessage('Email update initiated. Please check your new email for a verification link.');
-      console.log('Email update initiated. Please check your new email for a verification link.'); // Log info instead of notification
-      setUserEmail(newEmail); // Optimistically update UI
+      setUserEmail(newEmail);
     }
     setIsLoading(false);
   };
@@ -107,21 +101,18 @@ export default function ProfilePage() {
 
     if (!password || !confirmPassword) {
       setError('Please fill in both password fields.');
-      console.error('Password Update Error: Please fill in both password fields.'); // Log error instead of notification
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
-      console.error('Password Update Error: Passwords do not match.'); // Log error instead of notification
       setIsLoading(false);
       return;
     }
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters long.');
-      console.error('Password Update Error: Password must be at least 6 characters long.'); // Log error instead of notification
       setIsLoading(false);
       return;
     }
@@ -130,18 +121,16 @@ export default function ProfilePage() {
 
     if (error) {
       setError(`Error updating password: ${error.message}`);
-      console.error(`Password Update Failed: Error updating password: ${error.message}`); // Log error instead of notification
       console.error('Password update error:', error);
     } else {
       setMessage('Password updated successfully!');
-      console.log('Password updated successfully!'); // Log success instead of notification
       setPassword('');
       setConfirmPassword('');
     }
     setIsLoading(false);
   };
 
-  if (isLoading && !userEmail) {
+  if (!isAuthChecked) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-600">Loading profile...</p>

@@ -13,7 +13,7 @@ const parseAmount = (amount: string): number | null => {
   return parseFloat(amount.replace(/,/g, ''));
 };
 
-export const parse = (text: string): Transaction[] => {
+export const parse = (text: string, job_id: string): Transaction[] => {
   const transactions: Transaction[] = [];
   const lines = text.split('\n');
 
@@ -23,6 +23,7 @@ export const parse = (text: string): Transaction[] => {
       const groups = match.groups;
       if (groups) {
         transactions.push({
+          job_id,
           date: groups.date,
           description: groups.desc.trim(),
           debit: parseAmount(groups.debit),

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signInWithGoogle, signIn, signUp } from '@/lib/supabase-helpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function SignInPage() {
+function SignInComponent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -60,11 +60,11 @@ export default function SignInPage() {
         if (result.user && !result.session) {
           setError('Please check your email to confirm your account before signing in.');
         } else {
-          router.push('/dashboard');
+          router.push('/analyst-dashboard');
         }
       } else {
         await signIn(email, password);
-        router.push('/dashboard');
+        router.push('/analyst-dashboard');
       }
     } catch (err: any) {
       console.error('Email auth error:', err);
@@ -180,5 +180,13 @@ export default function SignInPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInComponent />
+    </Suspense>
   );
 }

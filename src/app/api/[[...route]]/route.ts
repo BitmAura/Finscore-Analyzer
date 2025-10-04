@@ -1,11 +1,10 @@
-
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { supabase } from '@/lib/supabase';
-import { analyzeJob } from '@/lib/analysis-worker';
 import { z } from 'zod';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { routeToParser, ParseResult } from '@/lib/parsing/master-parser';
 
 const app = new Hono().basePath('/api');
 
@@ -19,11 +18,15 @@ app.post('/v1/analysis/bank-statement', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
+        }
         const userId = user?.id;
-
         if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+            // Log cookies for debugging
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
         }
 
         const formData = await c.req.formData();
@@ -77,11 +80,39 @@ app.post('/v1/analysis/bank-statement', async (c) => {
             }
         });
 
+        // Parse each uploaded file and extract account details
+        const accountDetailsList: ParseResult[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const password = passwords[i] || '';
+            // Read file as text (assume PDF/CSV is already converted to text before parsing)
+            const text = await file.text();
+            const parseResult = routeToParser(text, job.id, password);
+            accountDetailsList.push(parseResult);
+            // Store account metadata in bank_accounts table
+            const { bankName, accountNumber, accountHolder, accountType } = parseResult.accountDetails;
+            if (bankName && accountNumber) {
+                const { error: accountError } = await supabase
+                    .from('bank_accounts')
+                    .insert({
+                        user_id: userId,
+                        job_id: job.id,
+                        bank_name: bankName,
+                        account_number: accountNumber,
+                        account_holder: accountHolder,
+                        account_type: accountType
+                    });
+                if (accountError) {
+                    console.error('Error storing account metadata:', accountError.message);
+                }
+            }
+        }
+
         await Promise.all(uploadPromises);
 
-        analyzeJob(job.id);
+        // analyzeJob(job.id);
 
-        return c.json({ analysisId: job.id });
+        return c.json({ analysisId: job.id, accounts: accountDetailsList.map(a => a.accountDetails) });
     } catch (error: any) {
         console.error('Error in /v1/analysis/bank-statement:', { error: error.message, stack: error.stack });
         return c.json({ error: 'An unexpected error occurred' }, 500);
@@ -92,13 +123,16 @@ app.get('/v1/analysis/status/:analysisId', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
-        const userId = user?.id;
-        const analysisId = c.req.param('analysisId');
-
-        if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
         }
+        const userId = user?.id;
+        if (!userId) {
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
+        }
+        const analysisId = c.req.param('analysisId');
 
         const { data: job, error } = await supabase
             .from('analysis_jobs')
@@ -131,11 +165,14 @@ app.get('/v1/analysis-jobs', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
+        }
         const userId = user?.id;
-
         if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
         }
 
         const { data: jobs, error } = await supabase
@@ -162,13 +199,17 @@ app.get('/v1/reports/:analysisId/export', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
-        const userId = user?.id;
-        const analysisId = c.req.param('analysisId');
-
-        if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
         }
+        const userId = user?.id;
+        if (!userId) {
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
+        }
+
+        const analysisId = c.req.param('analysisId');
 
         const { data: job, error } = await supabase
             .from('analysis_jobs')
@@ -286,13 +327,16 @@ app.get('/v1/analysis-jobs/:jobId', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
-        const userId = user?.id;
-        const jobId = c.req.param('jobId');
-
-        if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
         }
+        const userId = user?.id;
+        if (!userId) {
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
+        }
+        const jobId = c.req.param('jobId');
 
         const { data: job, error } = await supabase
             .from('analysis_jobs')
@@ -316,11 +360,14 @@ app.get('/v1/analytics/kpis', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
+        }
         const userId = user?.id;
-
         if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
         }
 
         const { data: jobs, error } = await supabase
@@ -344,7 +391,7 @@ app.get('/v1/analytics/kpis', async (c) => {
         }, 0) / completedJobs.length : 0;
 
         const redAlerts = jobs.flatMap(job => job.red_alerts || []);
-        const redAlertCounts = redAlerts.reduce((acc, alert) => {
+        const redAlertCounts = redAlerts.reduce((acc: Record<string, number>, alert) => {
             acc[alert.type] = (acc[alert.type] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
@@ -368,11 +415,14 @@ app.get('/v1/analytics/summary', async (c) => {
     try {
         const cookieStore = cookies();
         const supabaseAuth = createRouteHandlerClient({ cookies: () => cookieStore });
-        const { data: { user } } = await supabaseAuth.auth.getUser();
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError) {
+            console.error('Supabase Auth Error:', authError.message);
+        }
         const userId = user?.id;
-
         if (!userId) {
-            return c.json({ error: 'Unauthorized' }, 401);
+            console.error('Unauthorized: No user session found. Cookies:', cookieStore);
+            return c.json({ error: 'Unauthorized: No user session. Please log in again.' }, 401);
         }
 
         const { data: jobs, error } = await supabase

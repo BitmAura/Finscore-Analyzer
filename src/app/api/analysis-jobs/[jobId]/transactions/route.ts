@@ -1,10 +1,10 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerAuth, getUserId } from '@/lib/auth-server';
 
-export async function GET(request: NextRequest, { params }: { params: { jobId: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ jobId: string }> }) {
+  const { jobId } = await context.params;
   const session = await getServerAuth(request);
   const userId = getUserId(session);
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { jobId: s
   const { data: job, error: jobError } = await supabase
     .from('analysis_jobs')
     .select('id')
-    .eq('id', params.jobId)
+    .eq('id', jobId)
     .eq('user_id', userId)
     .single();
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: { jobId: s
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
-    .eq('job_id', params.jobId);
+    .eq('job_id', jobId);
 
   if (error) {
     return new NextResponse(error.message, { status: 500 });

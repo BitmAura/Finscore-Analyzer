@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
       if (data.session) {
         console.log('Session created successfully');
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        return NextResponse.redirect(new URL('/analyst-dashboard', request.url));
       } else {
         console.error('No session created after code exchange');
         return NextResponse.redirect(new URL('/auth/signin?error=no_session', request.url));

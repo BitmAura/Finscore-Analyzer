@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFinancialAnalysis } from '../../hooks/useFinancialAnalysis'
+import { supabase } from '../../lib/supabase-client';
 
-import { getServerAuth, getUserId } from '../../lib/auth-server';
+import { useUser } from '@supabase/auth-helpers-react';
 
 export interface UploadFile {
   id: string
@@ -13,6 +14,8 @@ export interface UploadFile {
   status: 'pending' | 'uploading' | 'completed' | 'error'
   error?: string
   preview?: string
+  accountDetails?: any
+  analysisId?: string | null
 }
 
 interface AdvancedFileUploadProps {
@@ -20,52 +23,55 @@ interface AdvancedFileUploadProps {
   maxFileSize?: number // in MB
   acceptedTypes?: string[]
   onFilesChange?: (files: UploadFile[]) => void
-  onUploadComplete?: (files: UploadFile[]) => void
+  onUploadComplete?: (files: UploadFile[], analysisId: string | null) => void
   className?: string
-  reportName: string;
-  referenceId: string;
-  reportType: string;
+  reportName?: string;
+  referenceId?: string;
+  reportType?: string;
 }
 
 const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
-  maxFiles = 10,
+  maxFiles = 100,
   maxFileSize = 10,
   acceptedTypes = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv'],
   onFilesChange,
   onUploadComplete,
   className = '',
-  reportName,
-  referenceId,
-  reportType
+  reportName = 'Financial Document Analysis',
+  referenceId = 'DOC-' + Date.now(),
+  reportType = 'bank-statement'
 }) => {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const user = useUser();
+  const userId = user?.id;
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [passwords, setPasswords] = useState<{[key: string]: string}>({});
 
-  useEffect(() => {
-    const fetchUser = async () => {
-        const session = await getServerAuth(new Request('http://localhost'));
-        const id = getUserId(session);
-        setUserId(id);
-    }
-    fetchUser();
-  }, []);
-
-  const {
-    isLoading: isAnalyzing,
-    isUploading: isAnalysisUploading,
-    progress: analysisProgress,
-    result: analysisResult,
-    error: analysisError,
-    analyzeDocuments,
-    reset: resetAnalysis
+  const { 
+    isLoading: isAnalyzing, 
+    isUploading: isAnalysisUploading, 
+    progress: analysisProgress, 
+    result: analysisResult, 
+    error: analysisError, 
+    analysisId,
+    analyzeDocuments, 
+    reset: resetAnalysis 
   } = useFinancialAnalysis({
     onComplete: (result) => {
-      setFiles(prev => prev.map(f => f.status === 'uploading' ? { ...f, status: 'completed', progress: 100 } : f))
-      if (onUploadComplete) onUploadComplete(files)
+      setFiles(prev => {
+        const newFiles = [...prev];
+        const fileToUpdate = newFiles.find(f => f.status === 'uploading');
+
+        if (fileToUpdate) {
+          fileToUpdate.status = 'completed';
+          fileToUpdate.progress = 100;
+          // The result from the analysis hook is for a single file
+          fileToUpdate.accountDetails = result;
+        }
+        return newFiles;
+      });
     },
     onError: (error) => {
       setFiles(prev => prev.map(f => f.status === 'uploading' ? { ...f, status: 'error', error } : f))
@@ -74,6 +80,19 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
       setFiles(prev => prev.map(f => f.status === 'uploading' ? { ...f, progress } : f))
     }
   })
+
+  useEffect(() => {
+    if (analysisId) {
+        setFiles(prev => {
+            const newFiles = [...prev];
+            const fileToUpdate = newFiles.find(f => f.status === 'uploading' && !f.analysisId);
+            if (fileToUpdate) {
+                fileToUpdate.analysisId = analysisId;
+            }
+            return newFiles;
+        });
+    }
+  }, [analysisId]);
 
   const handlePasswordChange = (fileId: string, password: string) => {
     setPasswords(prev => ({...prev, [fileId]: password}));
@@ -132,19 +151,35 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
     setPasswords(newPasswords);
   }
 
-  const handleUpload = async () => {
-    if (!userId) return;
-    setIsUploading(true)
-    const filesToUpload = files.filter(f => f.status === 'pending');
-    const fileObjects = filesToUpload.map(f => f.file);
-    const passwordValues = filesToUpload.map(f => passwords[f.id] || '');
-    await analyzeDocuments(fileObjects, passwordValues, userId, reportName, referenceId, reportType);
-    setIsUploading(false)
+  const handleUploadFile = async (fileId: string) => {
+    if (!userId) {
+      console.error("User not logged in");
+      return;
+    }
+    const fileToUpload = files.find(f => f.id === fileId);
+    if (!fileToUpload) return;
+
+    const fileObject = fileToUpload.file;
+    const passwordValue = passwords[fileToUpload.id] || '';
+
+    setFiles(prev => prev.map(f => 
+      f.id === fileId ? { ...f, status: 'uploading', progress: 0 } : f
+    ));
+
+    await analyzeDocuments([fileObject], [passwordValue], userId, reportName, referenceId, reportType);
+  }
+
+  const handleAnalyze = () => {
+    // This function now simply signals that the upload process is complete.
+    // The parent component will handle the navigation.
+    if (onUploadComplete) {
+        onUploadComplete(files, null);
+    }
   }
 
   // Replace uploadFiles with a proper handler
   const uploadFiles = () => {
-    handleUpload()
+    // This function is no longer used
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -206,6 +241,76 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
+
+  const handleRetryParse = async (fileIdx: number) => {
+    const file = files[fileIdx];
+    const password = passwords[file.id] || '';
+    const formData = new FormData();
+    formData.append('files', file.file);
+    formData.append('passwords', password);
+    formData.append('reportName', reportName);
+    formData.append('referenceId', referenceId);
+    formData.append('reportType', reportType);
+    let parsedAccount = {};
+    let error = undefined;
+    try {
+      const res = await fetch('/api/v1/analysis/bank-statement', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await res.json();
+      if (result.accounts && result.accounts[0]) {
+        parsedAccount = result.accounts[0];
+      }
+      if (result.error) {
+        error = 'Parsing failed';
+      }
+    } catch (err) {
+      error = 'Parsing failed';
+    }
+    const updatedFiles = [...files];
+    updatedFiles[fileIdx] = {
+      ...file,
+      status: error ? 'error' : 'completed',
+      accountDetails: parsedAccount,
+      error,
+    };
+    setFiles(updatedFiles);
+    onFilesChange?.(updatedFiles);
+    if (onUploadComplete) onUploadComplete(updatedFiles, null);
+  };
+
+  const uploadToSupabase = async (file: File, userId: string, metadata: any) => {
+    if (!userId) throw new Error('User ID is required');
+    const filePath = `${userId}/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage.from('bank-statements').upload(filePath, file);
+    if (error) throw error;
+    // Save metadata to documents table
+    await supabase.from('documents').insert({
+      user_id: userId,
+      name: file.name,
+      url: data?.path || '',
+      bank_name: typeof metadata?.bankName === 'string' ? metadata.bankName : null,
+      is_password_protected: !!metadata?.isPasswordProtected
+    });
+    return data?.path;
+  };
+
+  const handleUpload = async () => {
+    setIsUploading(true);
+    try {
+      if (!userId) throw new Error('User not logged in');
+      for (const fileObj of files) {
+        const metadata = fileObj.accountDetails || {};
+        await uploadToSupabase(fileObj.file, userId, metadata);
+      }
+      setIsUploading(false);
+      if (onUploadComplete) onUploadComplete(files, analysisId);
+    } catch (err) {
+      setIsUploading(false);
+      // Handle error
+    }
+  };
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -275,21 +380,11 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
             <h4 className="text-lg font-semibold text-white">
               Upload Queue ({files.length}/{maxFiles})
             </h4>
-            <motion.button
-              whileHover={{ scale: files.some(f => f.status === 'pending') ? 1.05 : 1 }}
-              whileTap={{ scale: files.some(f => f.status === 'pending') ? 0.95 : 1 }}
-              onClick={uploadFiles}
-              disabled={isUploading || !files.some(f => f.status === 'pending')}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white rounded-lg font-medium transition-colors duration-200"
-              data-testid="upload-all-button"
-            >
-              {isUploading ? 'Uploading...' : 'Upload All'}
-            </motion.button>
           </div>
 
           {/* Success indicator when at least one file completed and none uploading */}
-          {files.length > 0 && files.some(f => f.status === 'completed') && !files.some(f => f.status === 'uploading') && (
-            <div className="text-green-400 text-sm" data-testid="upload-success">Upload successful</div>
+          {files.length > 0 && files.every(f => f.status === 'completed') && (
+            <div className="text-green-400 text-sm" data-testid="upload-success">All files uploaded and analyzed.</div>
           )}
 
           <div className="space-y-2" data-testid="file-queue">
@@ -316,12 +411,31 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <input 
-                        type="password"
-                        placeholder="Password (if any)"
-                        onChange={(e) => handlePasswordChange(file.id, e.target.value)}
-                        className="bg-gray-700 border border-gray-600 rounded-md px-2 py-1 text-white text-sm w-36"
-                    />
+                    {(file.status === 'pending' || file.status === 'error') && (
+                      <>
+                        <input
+                          type="password"
+                          placeholder="Password (if any)"
+                          value={passwords[file.id] || ''}
+                          onChange={(e) => handlePasswordChange(file.id, e.target.value)}
+                          className="bg-gray-700 border border-gray-600 rounded-md px-2 py-1 text-white text-sm w-36"
+                        />
+                        <button
+                          onClick={() => handleUploadFile(file.id)}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
+                        >
+                          Upload
+                        </button>
+                      </>
+                    )}
+                    {file.status === 'error' && (
+                      <button
+                        onClick={() => handleRetryParse(index)}
+                        className="px-2 py-1 bg-yellow-500 text-white rounded ml-2"
+                      >
+                        Retry
+                      </button>
+                    )}
                     {file.status === 'uploading' && (
                       <div className="text-blue-500 text-sm font-medium">
                         {Math.round(file.progress)}%
@@ -354,9 +468,34 @@ const AdvancedFileUpload: React.FC<AdvancedFileUploadProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Account Details */}
+                {file.accountDetails && (
+                  <div className="mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400">
+                    <h4 className="font-semibold text-white mb-2">Extracted Details:</h4>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <p><strong>Bank Name:</strong> {file.accountDetails.bank_name || 'N/A'}</p>
+                        <p><strong>Account Name:</strong> {file.accountDetails.account_name || 'N/A'}</p>
+                        <p><strong>Account Number:</strong> {file.accountDetails.account_number || 'N/A'}</p>
+                        <p><strong>Currency:</strong> {file.accountDetails.currency || 'N/A'}</p>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
+          {files.length > 0 && files.every(f => f.status === 'completed') && (
+            <div className="flex justify-end mt-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleAnalyze}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                Analyze
+              </motion.button>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
     </div>

@@ -1,6 +1,8 @@
 -- FinScore Analyzer - Supabase Database Schema
 -- This script sets up all required tables for your SaaS financial analysis platform.
 
+-- Moved all SQL schema files from root to /sql folder for better organization
+
 -- Table for uploaded documents (bank statements, PDFs, etc.)
 CREATE TABLE IF NOT EXISTS public.documents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -65,4 +67,3 @@ CREATE TABLE IF NOT EXISTS public.security_logs (
 );
 
 -- Add more tables as needed for future modules.
-
