@@ -69,7 +69,7 @@ class TestNewCommand(unittest.TestCase):
             ['new', '--output-dir', self.test_dir, '--extra-context', 'invalid json']
         )
         
-        self.assertEqual(result.exit_code, 0)  # CLI doesn't exit with error code
+        self.assertNotEqual(result.exit_code, 0)  # Should exit with error
         self.assertIn('Invalid JSON string', result.output)
     
     def test_new_command_help(self):

@@ -40,8 +40,10 @@ def new(output_dir, extra_context):
         click.echo(f"Successfully created new project in {output_dir}")
     except json.JSONDecodeError:
         click.echo("Error: Invalid JSON string for --extra-context.", err=True)
+        raise click.Abort()
     except Exception as e:
         click.echo(f"An error occurred: {e}", err=True)
+        raise click.Abort()
 
 
 # Add the 'new' command to the main CLI group
