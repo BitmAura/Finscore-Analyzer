@@ -110,6 +110,7 @@ Unlike over-engineered AI systems, FinScore uses a clean, focused architecture:
 - Node.js 18+ 
 - npm or yarn
 - Git
+- Python 3.7+ (for CLI tools)
 
 ### Installation
 
@@ -134,6 +135,45 @@ Unlike over-engineered AI systems, FinScore uses a clean, focused architecture:
 
 ### View Demo Report
 Visit [http://localhost:3000/demo](http://localhost:3000/demo) to see the comprehensive financial report in action.
+
+## 🛠️ CLI Tools
+
+FinScore Analyzer includes a CLI tool for project scaffolding and management.
+
+### Setup CLI
+
+1. **Install Python dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Verify installation**
+   ```bash
+   python cli.py --help
+   ```
+
+### Create New Project
+
+The `new` command creates a new project from a template:
+
+```bash
+# Create a project with default settings
+python cli.py new --output-dir ./my-project
+
+# Create a project with custom settings
+python cli.py new --output-dir ./my-project --extra-context '{"project_name": "My Finance App", "author_name": "John Doe", "version": "1.0.0"}'
+```
+
+**Options:**
+- `--output-dir`: Directory where the project will be created (default: current directory)
+- `--extra-context`: JSON string with custom template variables
+
+**Available template variables:**
+- `project_name`: Name of the project (default: "My New Project")
+- `project_slug`: URL-safe project name (auto-generated from project_name)
+- `description`: Project description (default: "A new FinScore project")
+- `author_name`: Author name (default: "Your Name")
+- `version`: Project version (default: "0.1.0")
 
 ## 📊 Report Modules Available
 

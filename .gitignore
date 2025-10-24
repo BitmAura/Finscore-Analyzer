@@ -1,5 +1,15 @@
 node_modules
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
 # Playwright
 /test-results/
 /playwright-report/
