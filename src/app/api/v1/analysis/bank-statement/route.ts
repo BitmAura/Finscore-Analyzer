@@ -8,7 +8,7 @@ import { parseCsvToTransactions } from '@/lib/parsing/csv-parser';
 export async function POST(request: NextRequest) {
   // Initialize Supabase route handler client using the `cookies` helper
   const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   try {
     const { data: { user } } = await supabase.auth.getUser();

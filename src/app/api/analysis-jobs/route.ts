@@ -20,7 +20,7 @@ import { generateExecutiveSummary, detectFraud, predictCashFlow } from '@/lib/ai
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const body = await request.json();
     const { fileType, fileContent } = body;

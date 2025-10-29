@@ -3,6 +3,9 @@
  * Use this for admin operations and bypassing RLS
  */
 import { createClient } from '@supabase/supabase-js';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import type { Database } from '@/types/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -32,5 +35,21 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     },
   },
 });
+
+/**
+ * Creates a Supabase client for API routes (Next.js 15+ compatible)
+ * Properly handles async cookies()
+ * 
+ * @example
+ * const supabase = await createServerClient();
+ * const { data: { user } } = await supabase.auth.getUser();
+ */
+export async function createServerClient() {
+  const cookieStore = await cookies();
+  
+  return createRouteHandlerClient<Database>({ 
+    cookies: (() => cookieStore) as any 
+  });
+}
 
 export default supabaseAdmin;

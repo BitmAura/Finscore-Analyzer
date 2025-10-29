@@ -30,7 +30,7 @@ function initializeWebSocketServer() {
     // Authenticate user
     try {
       const cookieStore = await cookies();
-      const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+      const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -77,7 +77,7 @@ function initializeWebSocketServer() {
 async function sendInitialRiskData(ws: ExtendedWebSocket, jobId: string) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Fetch current risk data
     const { data: job } = await supabase

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   // Initialize Supabase server client
   const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   try {
     // Verify user's permission to access their own reports

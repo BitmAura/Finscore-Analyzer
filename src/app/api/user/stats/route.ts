@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     // Fix: Properly await cookies() and pass it synchronously
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

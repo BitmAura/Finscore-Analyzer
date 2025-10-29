@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const { newPassword } = await request.json();
     
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     if (!newPassword || newPassword.length < 8) {
       return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 });

@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ tra
   }
 
   const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
