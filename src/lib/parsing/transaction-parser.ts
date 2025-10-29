@@ -6,4 +6,5 @@ export interface Transaction {
   balance: number;
   category?: string;
   job_id: string; // Added missing job_id property
+  user_id?: string; // Added missing user_id property
 }

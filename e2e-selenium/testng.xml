@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="FinScore E2E Suite" verbose="1" parallel="false">
+  <test name="Public and Health">
+    <classes>
+      <class name="com.finscore.tests.HealthReadinessTest" />
+      <class name="com.finscore.tests.PublicRoutesTest" />
+    </classes>
+  </test>
+  <test name="Authenticated Flows" preserve-order="true">
+    <classes>
+      <class name="com.finscore.tests.AuthFlowTest" />
+      <class name="com.finscore.tests.DashboardTest" />
+      <class name="com.finscore.tests.CommandPaletteTest" />
+      <class name="com.finscore.tests.LogoutTest" />
+    </classes>
+  </test>
+</suite>

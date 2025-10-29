@@ -61,10 +61,11 @@ const SubscriptionPage: React.FC = () => {
     <SubscriptionProvider>
       <div className="p-6">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
+          {/* Header - Remove animation delays for better test performance */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0 }}
             className="mb-8"
           >
             <h1 className="text-3xl font-bold text-gray-900 mb-4">

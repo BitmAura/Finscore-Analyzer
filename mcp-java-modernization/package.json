@@ -1,0 +1,39 @@
+{
+  "name": "mcp-java-modernization",
+  "version": "1.0.0",
+  "description": "MCP server for Java application modernization - analyze codebases, suggest upgrades, and provide migration paths",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-java-modernization": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "npm run build && node dist/index.js",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "java",
+    "modernization",
+    "migration",
+    "spring-boot",
+    "dependency-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.1",
+    "xml2js": "^0.6.2",
+    "semver": "^7.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@types/xml2js": "^0.4.14",
+    "@types/semver": "^7.5.6",
+    "typescript": "^5.3.3"
+  }
+}

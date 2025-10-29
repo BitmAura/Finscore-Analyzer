@@ -1,175 +1,99 @@
-'use server';
+"use server";
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { parseCsvToTransactions } from '@/lib/parsing/csv-parser';
 
 export async function POST(request: NextRequest) {
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  // Initialize Supabase route handler client using the `cookies` helper
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const formData = await request.formData();
-    const files = formData.getAll('files') as File[];
-    const passwords = formData.getAll('passwords') as string[];
-    const userId = formData.get('userId') as string;
-    const reportName = formData.get('reportName') as string || 'Financial Analysis Report';
-    const referenceId = formData.get('referenceId') as string || `REF-${Date.now()}`;
-    const reportType = formData.get('reportType') as string || 'bank-statement';
-
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'No files provided' }, { status: 400 });
-    }
-
-    if (userId !== user.id) {
-      return NextResponse.json({ error: 'User ID mismatch' }, { status: 401 });
-    }
-
-    // First, detect bank details from the files
-    // We'll forward the request to our bank detection API
-    const bankDetectionUrl = new URL('/api/v1/bank-detection', request.url);
-    const detectionFormData = new FormData();
-    files.forEach(file => detectionFormData.append('files', file));
-
-    const detectionResponse = await fetch(bankDetectionUrl, {
-      method: 'POST',
-      body: detectionFormData,
-      headers: {
-        'Cookie': request.headers.get('cookie') || ''
-      }
-    });
-
-    const detectionResult = await detectionResponse.json();
-
-    if (!detectionResult.success) {
-      return NextResponse.json({ error: 'Failed to detect bank details' }, { status: 500 });
-    }
-
-    // Create a new analysis job
-    const { data: analysisJob, error: jobError } = await supabase
-      .from('analysis_jobs')
-      .insert({
-        user_id: userId,
-        report_name: reportName,
-        reference_id: referenceId,
-        report_type: reportType,
-        status: 'pending',
-        document_name: files.length === 1 ? files[0].name : `${files.length} documents`,
-        metadata: {
-          fileCount: files.length,
-          detectedBanks: detectionResult.accounts.map((account: any) => account.bank_name),
-          passwords: passwords.map(pwd => pwd ? 'Yes' : 'No')
-        }
-      })
-      .select()
+    // Step 1: Get or create a financial account for the user
+    let { data: financialAccount, error: accountError } = await supabase
+      .from('financial_accounts')
+      .select('id')
+      .eq('user_id', user.id)
       .single();
 
-    if (jobError) {
-      console.error('Error creating analysis job:', jobError);
-      return NextResponse.json({ error: 'Failed to create analysis job' }, { status: 500 });
+    if (accountError && accountError.code !== 'PGRST116') { // PGRST116 is "exact one row not found"
+      throw new Error('Failed to retrieve financial account.');
     }
 
-    // Now store the detected bank accounts
-    const bankStatements = [];
-    for (let i = 0; i < detectionResult.accounts.length; i++) {
-      const account = detectionResult.accounts[i];
-      const { data: statement, error: statementError } = await supabase
-        .from('bank_statements')
-        .insert({
-          user_id: userId,
-          bank_name: account.bank_name,
-          account_name: account.account_name,
-          account_number: account.account_number,
-          account_type: 'Checking', // Default, can be refined with better detection
-          currency: account.currency || 'INR',
-          document_id: account.documentId
-        })
-        .select()
+    if (!financialAccount) {
+      const { data: newAccount, error: newAccountError } = await supabase
+        .from('financial_accounts')
+        .insert({ user_id: user.id, name: 'Primary Account', account_type: 'personal' })
+        .select('id')
         .single();
 
-      if (statementError) {
-        console.error('Error storing bank statement:', statementError);
-      } else {
-        bankStatements.push(statement);
-      }
+      if (newAccountError) throw new Error('Failed to create financial account.');
+      financialAccount = newAccount;
     }
 
-    // Update the user's dashboard stats
-    await supabase.rpc('increment_user_analyses', { user_id: userId });
+    // Step 2: Process the uploaded file
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
 
-    // Log user activity
-    await supabase
-      .from('user_activities')
-      .insert({
-        user_id: userId,
-        type: 'analysis_started',
-        description: `Started analysis of ${files.length} document${files.length > 1 ? 's' : ''}`,
-        metadata: {
-          job_id: analysisJob.id,
-          report_name: reportName
-        }
-      });
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
 
-    // In a real implementation, we would now queue the analysis job for processing
-    // For this example, we'll update the job status to simulate processing
-    setTimeout(async () => {
-      await supabase
-        .from('analysis_jobs')
-        .update({
-          status: 'processing'
-        })
-        .eq('id', analysisJob.id);
+    // For now, we only support CSV. This can be expanded later.
+    if (file.type !== 'text/csv') {
+        return NextResponse.json({ error: 'Only CSV files are supported at this time.' }, { status: 400 });
+    }
 
-      // After "processing", we'd update to completed
-      setTimeout(async () => {
-        await supabase
-          .from('analysis_jobs')
-          .update({
-            status: 'completed',
-            completed_at: new Date().toISOString()
-          })
-          .eq('id', analysisJob.id);
+    // Step 3: Parse the file to get structured transactions
+    // read file text and pass string content to the CSV parser
+    const fileContent = await file.text();
+    const parsedTransactions = await parseCsvToTransactions(fileContent);
 
-        // Create dummy analysis results
-        await supabase
-          .from('analysis_results')
-          .insert({
-            job_id: analysisJob.id,
-            summary: {
-              totalTransactions: Math.floor(Math.random() * 100) + 50,
-              totalInflow: Math.floor(Math.random() * 100000) + 10000,
-              totalOutflow: Math.floor(Math.random() * 50000) + 5000,
-              balanceTrend: 'positive',
-              riskLevel: 'low'
-            }
-          });
+    if (parsedTransactions.length === 0) {
+        return NextResponse.json({ error: 'No transactions found in the file.' }, { status: 400 });
+    }
 
-        // Log completion activity
-        await supabase
-          .from('user_activities')
-          .insert({
-            user_id: userId,
-            type: 'analysis_completed',
-            description: `Completed analysis of ${files.length} document${files.length > 1 ? 's' : ''}`,
-            metadata: {
-              job_id: analysisJob.id,
-              report_name: reportName
-            }
-          });
-      }, 10000); // 10 seconds to "complete" the analysis
-    }, 5000); // 5 seconds to move to "processing"
+    // Step 4: Prepare the data for insertion
+    const transactionsToInsert = parsedTransactions.map(tx => ({
+      ...tx,
+      user_id: user.id,
+      account_id: financialAccount!.id,
+    }));
+
+    // Step 5: Upsert the transactions into the database
+    // This will insert new transactions and ignore duplicates based on the unique constraint
+    const { error: upsertError } = await supabase
+        .from('transactions')
+        .upsert(transactionsToInsert, {
+            onConflict: 'account_id,transaction_date,description,amount'
+        });
+
+    if (upsertError) {
+        console.error('Error upserting transactions:', upsertError);
+        throw new Error('Failed to save transaction data.');
+    }
+
+    // Step 6: Log activity and return success
+    await supabase.from('user_activities').insert({
+        user_id: user.id,
+        type: 'data_imported',
+        description: `Imported ${parsedTransactions.length} transactions from ${file.name}`,
+        metadata: { accountId: financialAccount!.id }
+    });
 
     return NextResponse.json({
       success: true,
-      analysisId: analysisJob.id,
-      detectedAccounts: detectionResult.accounts
+      message: `Successfully imported ${parsedTransactions.length} transactions.`,
+      accountId: financialAccount!.id
     });
 
   } catch (error: any) {
-    console.error('Server error:', error);
+    console.error('Server error in bank statement processing:', error);
     return NextResponse.json(
       { error: error.message || 'An unexpected error occurred' },
       { status: 500 }

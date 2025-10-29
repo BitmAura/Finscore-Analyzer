@@ -8,7 +8,8 @@ export async function GET(
 ) {
   try {
     const { analysisId } = await params;
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
     // Get user from session
     const { data: { session } } = await supabase.auth.getSession();
@@ -49,4 +50,3 @@ export async function GET(
     }, { status: 500 });
   }
 }
-

@@ -1,71 +1,90 @@
-'use client'
+"use client";
 
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useDashboard, Transaction } from '@/contexts/DashboardContext';
 
-interface Transaction {
-  date: string;
-  description: string;
-  category: string;
-  amount: number;
-  period?: 'A' | 'B';
-}
+// A new component to handle the category selection dropdown for a single transaction
+const CategorySelector = ({ transaction }: { transaction: Transaction }) => {
+  const { categories, updateTransaction } = useDashboard();
+  const [isLoading, setIsLoading] = useState(false);
 
-interface TransactionTableProps {
-  transactions: Transaction[];
-}
+  const handleCategoryChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategory = event.target.value;
+    const originalTransaction = { ...transaction };
 
-const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'ascending' | 'descending' } | null>(null);
-  const isComparison = transactions.some(tx => tx.period);
+    // Optimistic UI update
+    updateTransaction({ ...transaction, category: newCategory });
+    setIsLoading(true);
 
-  const compareValues = (aVal: any, bVal: any) => {
-    // Normalize undefined to empty string
-    if (aVal === undefined || aVal === null) aVal = '';
-    if (bVal === undefined || bVal === null) bVal = '';
+    try {
+      const response = await fetch(`/api/v1/transactions/${transaction.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: newCategory }),
+        }
+      );
 
-    // Numbers
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      if (aVal < bVal) return -1;
-      if (aVal > bVal) return 1;
-      return 0;
+      if (!response.ok) {
+        throw new Error('Failed to update category');
+      }
+
+      // The API response should be the updated transaction, so we can update the state again
+      // to be perfectly in sync with the database.
+      const updatedFromServer = await response.json();
+      updateTransaction(updatedFromServer);
+
+    } catch (error) {
+      console.error('Reverting optimistic update due to error:', error);
+      // If the API call fails, revert the change in the UI
+      updateTransaction(originalTransaction);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Dates (ISO strings)
-    const dateA = Date.parse(aVal);
-    const dateB = Date.parse(bVal);
-    if (!isNaN(dateA) && !isNaN(dateB)) {
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
-      return 0;
-    }
-
-    // Fallback to string comparison
-    const strA = String(aVal).toLowerCase();
-    const strB = String(bVal).toLowerCase();
-    if (strA < strB) return -1;
-    if (strA > strB) return 1;
-    return 0;
   };
 
+  return (
+    <select
+      value={transaction.category}
+      onChange={handleCategoryChange}
+      disabled={isLoading}
+      className={`bg-transparent border-none rounded-md p-1 text-left w-full appearance-none cursor-pointer ${isLoading ? 'text-gray-500' : 'text-gray-400'}`}
+    >
+      {categories.map(cat => (
+        <option key={cat} value={cat} className="bg-gray-800 text-white">
+          {cat}
+        </option>
+      ))}
+    </select>
+  );
+};
+
+const TransactionTable: React.FC = () => {
+  const { filteredTransactions: transactionsFromContext } = useDashboard();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'ascending' | 'descending' } | null>(null);
+
   const sortedTransactions = useMemo(() => {
-    let sortableItems = [...transactions];
+    let sortableItems = [...transactionsFromContext];
     if (sortConfig !== null) {
-      const { key, direction } = sortConfig;
       sortableItems.sort((a, b) => {
-        const aVal = (a as any)[key];
-        const bVal = (b as any)[key];
-        const cmp = compareValues(aVal, bVal);
-        return direction === 'ascending' ? cmp : -cmp;
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
       });
     }
     return sortableItems;
-  }, [transactions, sortConfig]);
+  }, [transactionsFromContext, sortConfig]);
 
-  const filteredTransactions = sortedTransactions.filter(tx =>
+  const filteredBySearch = sortedTransactions.filter(tx =>
     tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.category.toLowerCase().includes(searchTerm.toLowerCase())
+    (tx.category && tx.category.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const requestSort = (key: keyof Transaction) => {
@@ -96,7 +115,6 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => 
         <table className="w-full text-left text-gray-400">
           <thead className="text-xs text-gray-300 uppercase bg-gray-700/50">
             <tr>
-              {isComparison && <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('period')}>Period</th>}
               <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('date')}>Date</th>
               <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('description')}>Description</th>
               <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('category')}>Category</th>
@@ -104,12 +122,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => 
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((tx, index) => (
-              <tr key={index} className="border-b border-gray-700 hover:bg-gray-700/30">
-                {isComparison && <td className="px-6 py-4">{tx.period}</td>}
+            {filteredBySearch.map((tx) => (
+              <tr key={tx.id} className="border-b border-gray-700 hover:bg-gray-700/30">
                 <td className="px-6 py-4">{new Date(tx.date).toLocaleDateString()}</td>
                 <td className="px-6 py-4 text-white">{tx.description}</td>
-                <td className="px-6 py-4">{tx.category}</td>
+                <td className="px-6 py-4">
+                  <CategorySelector transaction={tx} />
+                </td>
                 <td className={`px-6 py-4 text-right font-medium ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount).toLocaleString()}
                 </td>

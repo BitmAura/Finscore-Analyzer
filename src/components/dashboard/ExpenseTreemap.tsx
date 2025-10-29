@@ -1,25 +1,20 @@
-'use client'
+"use client";
 
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
+import { useDashboard } from '@/contexts/DashboardContext';
 
-interface Transaction {
-  category: string;
-  amount: number;
-}
+// This component no longer needs to accept transactions as a prop.
+// It will get all data directly from the DashboardContext.
+const ExpenseTreemap: React.FC = () => {
+  const { allTransactions, selectCategory, selectedCategory } = useDashboard();
 
-interface ExpenseTreemapProps {
-  transactionsA: Transaction[];
-  transactionsB?: Transaction[];
-}
-
-const ExpenseTreemap: React.FC<ExpenseTreemapProps> = ({ transactionsA, transactionsB }) => {
-  const processData = (transactions: Transaction[]) => {
+  const processData = (transactions: typeof allTransactions) => {
     const categorySpending: { [key: string]: number } = {};
 
     transactions.forEach(tx => {
-      if (tx.amount < 0) { // Only consider expenses
+      if (tx.type === 'expense') { // Only consider expenses
         const category = tx.category || 'Uncategorized';
         if (!categorySpending[category]) {
           categorySpending[category] = 0;
@@ -34,8 +29,7 @@ const ExpenseTreemap: React.FC<ExpenseTreemapProps> = ({ transactionsA, transact
     }));
   };
 
-  const treemapDataA = processData(transactionsA);
-  const treemapDataB = transactionsB ? processData(transactionsB) : null;
+  const treemapData = processData(allTransactions);
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#a4de6c', '#d0ed57', '#ffc0cb'];
 
@@ -58,45 +52,40 @@ const ExpenseTreemap: React.FC<ExpenseTreemapProps> = ({ transactionsA, transact
       className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
     >
       <h3 className="text-xl font-bold text-white mb-4">Expense Breakdown</h3>
-      <div className={`grid ${treemapDataB ? 'grid-cols-2 gap-4' : 'grid-cols-1'}`}>
-        <div className="w-full h-[400px]">
-            <h4 className="text-center text-white mb-2">Period A</h4>
-            <ResponsiveContainer width="100%" height="100%">
-                <Treemap
-                data={treemapDataA}
-                dataKey="size"
-                stroke="#fff"
-                fill="#8884d8"
-                content={<CustomizedContent colors={COLORS} />}
-                >
-                <Tooltip content={<CustomTooltip />} />
-                </Treemap>
-            </ResponsiveContainer>
-        </div>
-        {treemapDataB && (
-            <div className="w-full h-[400px]">
-                <h4 className="text-center text-white mb-2">Period B</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                    <Treemap
-                    data={treemapDataB}
-                    dataKey="size"
-                    stroke="#fff"
-                    fill="#8884d8"
-                    content={<CustomizedContent colors={COLORS} />}
-                    >
-                    <Tooltip content={<CustomTooltip />} />
-                    </Treemap>
-                </ResponsiveContainer>
-            </div>
-        )}
+      <div className="w-full h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <Treemap
+            data={treemapData}
+            dataKey="size"
+            stroke="#fff"
+            fill="#8884d8"
+            content={<CustomizedContent colors={COLORS} selectCategory={selectCategory} selectedCategory={selectedCategory} />}
+          >
+            <Tooltip content={<CustomTooltip />} />
+          </Treemap>
+        </ResponsiveContainer>
       </div>
     </motion.div>
   );
 };
 
-const CustomizedContent = ({ root, depth, x, y, width, height, index, colors, name }: any) => {
+const CustomizedContent = (props: any) => {
+  const {
+    root, depth, x, y, width, height, index, colors, name, 
+    // Get the filter functions from props passed by the Treemap content prop
+    selectCategory, selectedCategory 
+  } = props;
+
+  const isSelected = name === selectedCategory;
+
+  const handleClick = () => {
+    // If the clicked category is already the selected one, pass null to clear the filter.
+    // Otherwise, select the new category.
+    selectCategory(isSelected ? null : name);
+  };
+
   return (
-    <g>
+    <g onClick={handleClick} style={{ cursor: 'pointer' }}>
       <rect
         x={x}
         y={y}
@@ -104,13 +93,15 @@ const CustomizedContent = ({ root, depth, x, y, width, height, index, colors, na
         height={height}
         style={{
           fill: colors[index % colors.length],
-          stroke: '#fff',
-          strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
+          stroke: isSelected ? '#38B2AC' : '#fff', // Highlight color for stroke
+          strokeWidth: isSelected ? 4 : 2 / (depth + 1e-10),
+          strokeOpacity: isSelected ? 1 : 1 / (depth + 1e-10),
+          filter: isSelected ? `drop-shadow(0 0 5px #38B2AC)` : 'none',
+          transition: 'all 0.2s ease-in-out',
         }}
       />
       {depth === 1 ? (
-        <text x={x + width / 2} y={y + height / 2 + 7} textAnchor="middle" fill="#fff" fontSize={14}>
+        <text x={x + width / 2} y={y + height / 2 + 7} textAnchor="middle" fill="#fff" fontSize={14} style={{ pointerEvents: 'none' }}>
           {name}
         </text>
       ) : null}

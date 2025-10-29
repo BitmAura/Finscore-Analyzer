@@ -1,7 +1,6 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
 import { getServerAuth, getUserId } from '@/lib/auth-server';
 import { getProfile, updateProfile } from '@/lib/supabase-helpers';
 

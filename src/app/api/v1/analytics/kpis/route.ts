@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
     // Get user from session
     const { data: { session } } = await supabase.auth.getSession();
@@ -62,4 +63,3 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
-

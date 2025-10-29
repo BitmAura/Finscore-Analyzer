@@ -1,6 +1,8 @@
 import { Transaction } from '../parsing/transaction-parser';
+import { CategorizedTransaction } from './categorization-service';
 
-export interface ChequeReturn {
+// Internal interfaces (not exported)
+interface ChequeReturn {
   date: Date;
   amount: number;
   reason: string;
@@ -8,7 +10,7 @@ export interface ChequeReturn {
   frequency: number;
 }
 
-export interface MonthlyTrend {
+interface MonthlyTrend {
   month: string;
   credits: number;
   debits: number;
@@ -16,7 +18,7 @@ export interface MonthlyTrend {
   endBalance: number;
 }
 
-export interface CashflowAnalysis {
+interface CashflowAnalysis {
   monthlyTrends: MonthlyTrend[];
   netCashflow: number;
   positiveMonths: number;
@@ -24,128 +26,358 @@ export interface CashflowAnalysis {
   volatility: number;
 }
 
-export interface RiskFactor {
+interface RiskFactor {
   factor: string;
-  impact: 'high' | 'medium' | 'low';
+  severity: 'Low' | 'Medium' | 'High' | 'Critical';
   description: string;
-  score: number;
+  impact: number; // 0-100
 }
 
 export interface RiskAssessment {
-  overallScore: number; // 0-100
-  factors: RiskFactor[];
-  chequeReturnRisk: number;
-  cashflowStability: number;
-  transactionPatterns: number;
+  overallRiskScore: number; // 0-100
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  riskFactors: RiskFactor[];
   recommendations: string[];
+  financialHealthScore: number; // 0-100
+  creditworthinessScore: number; // 0-100
 }
 
-export function analyzeTransactionPatterns(transactions: Transaction[]): { highRiskTransactions: Transaction[] } {
+/**
+ * Analyzes transaction patterns for high-risk indicators
+ * @param transactions Array of transactions to analyze
+ * @returns RiskAssessment object with overall risk score and factors
+ * @internal Used by analysis-worker.ts
+ */
+export function analyzeTransactionPatterns(transactions: Transaction[]): RiskAssessment {
     const highRiskKeywords = ['bet', 'casino', 'gambling', 'lottery'];
     const highRiskTransactions = transactions.filter(t => {
         const description = t.description.toLowerCase();
         return highRiskKeywords.some(keyword => description.includes(keyword));
     });
 
-    return { highRiskTransactions };
-}
+    // Create a basic risk assessment
+    let riskScore = 0;
+    const riskFactors: RiskFactor[] = [];
+    const recommendations: string[] = [];
 
-export function assessRisk(transactions: Transaction[]): RiskAssessment {
-    const factors: RiskFactor[] = [];
-    let totalScore = 100;
-
-    // Cheque return risk
-    const chequeReturns = detectChequeReturns(transactions);
-    const chequeReturnRisk = Math.min(chequeReturns.length * 15, 60);
-    if (chequeReturns.length > 0) {
-        factors.push({
-            factor: 'Cheque Returns',
-            impact: chequeReturns.length > 2 ? 'high' : 'medium',
-            description: `${chequeReturns.length} cheque returns detected, indicating potential liquidity issues.`,
-            score: chequeReturnRisk
-        });
-        totalScore -= chequeReturnRisk;
-    }
-
-    // Cashflow stability
-    const cashflow = analyzeCashflow(transactions);
-    const volatilityRisk = Math.min(cashflow.volatility / 10000, 40);
-    if (cashflow.volatility > 50000) {
-        factors.push({
-            factor: 'Cashflow Volatility',
-            impact: 'high',
-            description: 'High volatility in monthly cashflow, suggesting unstable financial situation.',
-            score: volatilityRisk
-        });
-        totalScore -= volatilityRisk;
-    }
-
-    // Low balance risk
-    const lowBalance = Math.min(...transactions.map(t => t.balance).filter(b => b !== null) as number[]);
-    if (lowBalance < 1000) {
-        const lowBalanceRisk = 25;
-        factors.push({
-            factor: 'Low Balance Risk',
-            impact: 'high',
-            description: 'Account balance frequently drops below a minimum threshold, increasing risk of default.',
-            score: lowBalanceRisk
-        });
-        totalScore -= lowBalanceRisk;
-    }
-
-    // Transaction pattern analysis
-    const transactionPatterns = analyzeTransactionPatterns(transactions);
-    const patternRisk = transactionPatterns.highRiskTransactions.length * 10;
-    if (patternRisk > 0) {
-        factors.push({
+    if (highRiskTransactions.length > 0) {
+        riskFactors.push({
             factor: 'High-Risk Transactions',
-            impact: 'medium',
-            description: `Detected ${transactionPatterns.highRiskTransactions.length} high-risk transactions (e.g., gambling, large unexplained transfers).`,
-            score: patternRisk
+            severity: highRiskTransactions.length > 5 ? 'High' : 'Medium',
+            description: `${highRiskTransactions.length} high-risk transactions detected`,
+            impact: Math.min(highRiskTransactions.length * 5, 30)
         });
-        totalScore -= patternRisk;
+        riskScore += riskFactors[riskFactors.length - 1].impact;
+        recommendations.push('Review high-risk transactions for legitimacy');
     }
-
-    const recommendations = generateRiskRecommendations(factors);
 
     return {
-        overallScore: Math.max(0, totalScore),
-        factors,
-        chequeReturnRisk,
-        cashflowStability: 100 - volatilityRisk,
-        transactionPatterns: 100 - patternRisk,
-        recommendations
+        overallRiskScore: Math.min(riskScore, 100),
+        riskLevel: riskScore > 70 ? 'Critical' : riskScore > 50 ? 'High' : riskScore > 30 ? 'Medium' : 'Low',
+        riskFactors,
+        recommendations,
+        financialHealthScore: Math.max(100 - riskScore, 0),
+        creditworthinessScore: Math.max(100 - (riskScore * 0.8), 0)
     };
 }
 
-function generateRiskRecommendations(factors: RiskFactor[]): string[] {
-    const recommendations: string[] = [];
-    
-    factors.forEach(factor => {
-        switch (factor.factor) {
-            case 'Cheque Returns':
-                recommendations.push('Monitor cheque clearing patterns and maintain adequate balance');
-                break;
-            case 'Cashflow Volatility':
-                recommendations.push('Implement cash flow forecasting and maintain higher reserves');
-                break;
-            case 'Low Balance Risk':
-                recommendations.push('Maintain minimum balance to avoid overdraft charges');
-                break;
-            case 'High-Risk Transactions':
-                recommendations.push('Review high-risk spending patterns and consider their impact on financial stability.');
-                break;
-        }
+/**
+ * Comprehensive risk assessment for categorized transactions
+ * @param transactions Array of categorized transactions to assess
+ * @param summary Financial summary object with totals and metrics
+ * @returns Complete RiskAssessment with factors and recommendations
+ * @internal Helper function for detailed risk analysis
+ */
+export function assessRisk(
+  transactions: CategorizedTransaction[],
+  summary: any
+): RiskAssessment {
+  const riskFactors: RiskFactor[] = [];
+  let totalRiskScore = 0;
+
+  // 1. Check for low balance
+  if (summary.lowestBalance < 10000) {
+    const severity = summary.lowestBalance < 1000 ? 'Critical' :
+                     summary.lowestBalance < 5000 ? 'High' : 'Medium';
+    riskFactors.push({
+      factor: 'Low Account Balance',
+      severity,
+      description: `Lowest balance of ₹${summary.lowestBalance.toFixed(2)} indicates potential cash flow issues`,
+      impact: severity === 'Critical' ? 25 : severity === 'High' ? 15 : 10
     });
+    totalRiskScore += riskFactors[riskFactors.length - 1].impact;
+  }
 
-    if (recommendations.length === 0) {
-        recommendations.push('Financial profile appears stable with low risk indicators');
+  // 2. Check for high expense ratio
+  const expenseRatio = summary.totalIncome > 0 ?
+    (summary.totalExpenses / summary.totalIncome) * 100 : 0;
+
+  if (expenseRatio > 90) {
+    const severity = expenseRatio > 110 ? 'Critical' :
+                     expenseRatio > 100 ? 'High' : 'Medium';
+    riskFactors.push({
+      factor: 'High Expense Ratio',
+      severity,
+      description: `Expenses are ${expenseRatio.toFixed(1)}% of income - very high burn rate`,
+      impact: severity === 'Critical' ? 20 : severity === 'High' ? 15 : 10
+    });
+    totalRiskScore += riskFactors[riskFactors.length - 1].impact;
+  }
+
+  // 3. Check for frequent ATM withdrawals (potential gambling/cash business)
+  const atmTransactions = transactions.filter(tx =>
+    tx.description.toLowerCase().includes('atm') ||
+    tx.description.toLowerCase().includes('withdrawal')
+  );
+
+  if (atmTransactions.length > 20) {
+    const atmAmount = atmTransactions.reduce((sum, tx) => sum + (tx.debit || 0), 0);
+    const atmRatio = (atmAmount / summary.totalExpenses) * 100;
+
+    if (atmRatio > 30) {
+      riskFactors.push({
+        factor: 'High ATM Usage',
+        severity: atmRatio > 50 ? 'High' : 'Medium',
+        description: `${atmTransactions.length} ATM withdrawals (${atmRatio.toFixed(1)}% of expenses) - potential red flag`,
+        impact: atmRatio > 50 ? 15 : 10
+      });
+      totalRiskScore += riskFactors[riskFactors.length - 1].impact;
     }
+  }
 
-    return recommendations;
+  // 4. Check for bounced cheques
+  const bouncedCheques = transactions.filter(tx =>
+    tx.description.toLowerCase().includes('bounce') ||
+    tx.description.toLowerCase().includes('dishonor') ||
+    tx.description.toLowerCase().includes('return')
+  );
+
+  if (bouncedCheques.length > 0) {
+    riskFactors.push({
+      factor: 'Bounced Cheques/Payments',
+      severity: bouncedCheques.length > 3 ? 'Critical' : 'High',
+      description: `${bouncedCheques.length} bounced payment(s) detected - serious credit risk`,
+      impact: bouncedCheques.length > 3 ? 30 : 20
+    });
+    totalRiskScore += riskFactors[riskFactors.length - 1].impact;
+  }
+
+  // 5. Check for loan EMIs
+  const loanTransactions = transactions.filter(tx =>
+    tx.description.toLowerCase().includes('emi') ||
+    tx.description.toLowerCase().includes('loan')
+  );
+
+  if (loanTransactions.length > 0) {
+    const loanAmount = loanTransactions.reduce((sum, tx) => sum + (tx.debit || 0), 0);
+    const loanRatio = (loanAmount / summary.totalIncome) * 100;
+
+    if (loanRatio > 40) {
+      riskFactors.push({
+        factor: 'High Debt Burden',
+        severity: loanRatio > 60 ? 'High' : 'Medium',
+        description: `Loan EMIs are ${loanRatio.toFixed(1)}% of income - high debt burden`,
+        impact: loanRatio > 60 ? 15 : 10
+      });
+      totalRiskScore += riskFactors[riskFactors.length - 1].impact;
+    }
+  }
+
+  // 6. Check for gambling transactions
+  const gamblingKeywords = ['casino', 'bet', 'lottery', 'gambling', 'poker', 'rummy'];
+  const gamblingTransactions = transactions.filter(tx =>
+    gamblingKeywords.some(keyword => tx.description.toLowerCase().includes(keyword))
+  );
+
+  if (gamblingTransactions.length > 0) {
+    riskFactors.push({
+      factor: 'Gambling Activity',
+      severity: 'High',
+      description: `${gamblingTransactions.length} gambling-related transaction(s) detected`,
+      impact: 20
+    });
+    totalRiskScore += 20;
+  }
+
+  // 7. Check for irregular income (freelancers/gig workers)
+  const salaryTransactions = transactions.filter(tx =>
+    tx.category === 'Salary & Income' && (tx.credit || 0) > 10000
+  );
+
+  if (salaryTransactions.length < 3 && transactions.length > 30) {
+    riskFactors.push({
+      factor: 'Irregular Income Pattern',
+      severity: 'Medium',
+      description: 'No consistent salary deposits detected - income instability',
+      impact: 10
+    });
+    totalRiskScore += 10;
+  }
+
+  // Calculate risk level
+  const overallRiskScore = Math.min(totalRiskScore, 100);
+  let riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+
+  if (overallRiskScore < 25) riskLevel = 'Low';
+  else if (overallRiskScore < 50) riskLevel = 'Medium';
+  else if (overallRiskScore < 75) riskLevel = 'High';
+  else riskLevel = 'Critical';
+
+  // Calculate financial health score (inverse of risk)
+  const financialHealthScore = Math.max(0, 100 - overallRiskScore);
+
+  // Calculate creditworthiness
+  let creditworthinessScore = 100;
+  creditworthinessScore -= (bouncedCheques.length * 15);
+  creditworthinessScore -= (expenseRatio > 100 ? 20 : 0);
+  creditworthinessScore -= (summary.lowestBalance < 1000 ? 15 : 0);
+  creditworthinessScore = Math.max(0, Math.min(100, creditworthinessScore));
+
+  // Generate recommendations
+  const recommendations: string[] = [];
+
+  if (summary.savingsRate < 10) {
+    recommendations.push('Increase savings rate to at least 20% of income');
+  }
+  if (expenseRatio > 80) {
+    recommendations.push('Reduce discretionary spending - expenses are too high');
+  }
+  if (bouncedCheques.length > 0) {
+    recommendations.push('Maintain sufficient balance to avoid payment bounces');
+  }
+  if (atmTransactions.length > 15) {
+    recommendations.push('Use digital payments instead of cash withdrawals');
+  }
+  if (summary.lowestBalance < 5000) {
+    recommendations.push('Build emergency fund of at least 3 months expenses');
+  }
+
+  // If low risk, add positive recommendations
+  if (riskLevel === 'Low') {
+    recommendations.push('Excellent financial discipline - maintain this pattern');
+    recommendations.push('Consider increasing investments for wealth building');
+  }
+
+  return {
+    overallRiskScore,
+    riskLevel,
+    riskFactors,
+    recommendations,
+    financialHealthScore,
+    creditworthinessScore
+  };
 }
 
-function detectChequeReturns(transactions: Transaction[]): ChequeReturn[] {
+// Detect suspicious/fraudulent patterns
+export interface FraudAlert {
+  alertType: string;
+  type: string; // Added for compatibility
+  severity: 'Low' | 'Medium' | 'High';
+  description: string;
+  affectedTransactions: string[]; // Transaction IDs
+}
+
+export interface FraudAnalysisResult {
+  alerts: FraudAlert[];
+  fraudScore: number;
+  fraudLevel: 'Low' | 'Medium' | 'High';
+}
+
+/**
+ * Detects fraudulent patterns in transaction history
+ * @param transactions Array of categorized transactions to analyze
+ * @returns FraudAnalysisResult with alerts, fraudScore and fraudLevel
+ * @internal Helper function for fraud detection analysis
+ */
+export function detectFraudPatterns(transactions: CategorizedTransaction[]): FraudAnalysisResult {
+  const alerts: FraudAlert[] = [];
+
+  // 1. Check for duplicate transactions (potential fraud)
+  const transactionMap = new Map<string, CategorizedTransaction[]>();
+
+  transactions.forEach(tx => {
+    const key = `${tx.date}-${tx.description}-${tx.debit || tx.credit}`;
+    if (!transactionMap.has(key)) {
+      transactionMap.set(key, []);
+    }
+    transactionMap.get(key)!.push(tx);
+  });
+
+  transactionMap.forEach((txList) => {
+    if (txList.length > 1) {
+      alerts.push({
+        alertType: 'Duplicate Transactions',
+        type: 'Duplicate Transactions',
+        severity: 'Medium',
+        description: `${txList.length} identical transactions found on same date`,
+        affectedTransactions: txList.map(tx => tx.job_id)
+      });
+    }
+  });
+
+  // 2. Check for round number transactions (potential fraud)
+  const roundNumberTxs = transactions.filter(tx => {
+    const amount = tx.debit || tx.credit || 0;
+    return amount >= 1000 && amount % 1000 === 0;
+  });
+
+  if (roundNumberTxs.length > 10) {
+    alerts.push({
+      alertType: 'Excessive Round Number Transactions',
+      type: 'Excessive Round Number Transactions',
+      severity: 'Low',
+      description: `${roundNumberTxs.length} transactions with round numbers (e.g., ₹10,000) - unusual pattern`,
+      affectedTransactions: roundNumberTxs.map(tx => tx.job_id).slice(0, 5)
+    });
+  }
+
+  // 3. Check for rapid consecutive transactions
+  const sortedTxs = [...transactions].sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  let rapidCount = 0;
+  for (let i = 1; i < sortedTxs.length; i++) {
+    const timeDiff = new Date(sortedTxs[i].date).getTime() -
+                     new Date(sortedTxs[i-1].date).getTime();
+    if (timeDiff < 60000) { // Less than 1 minute apart
+      rapidCount++;
+    }
+  }
+
+  if (rapidCount > 5) {
+    alerts.push({
+      alertType: 'Rapid Sequential Transactions',
+      type: 'Rapid Sequential Transactions',
+      severity: 'Medium',
+      description: `${rapidCount} transactions occurring within minutes - potential fraud`,
+      affectedTransactions: []
+    });
+  }
+
+  // Calculate fraud score based on alerts
+  const fraudScore = alerts.reduce((score, alert) => {
+    if (alert.severity === 'High') return score + 30;
+    if (alert.severity === 'Medium') return score + 20;
+    return score + 10;
+  }, 0);
+
+  const fraudLevel: 'Low' | 'Medium' | 'High' =
+    fraudScore >= 60 ? 'High' : fraudScore >= 30 ? 'Medium' : 'Low';
+
+  return {
+    alerts,
+    fraudScore: Math.min(fraudScore, 100),
+    fraudLevel
+  };
+}
+
+/**
+ * Detects cheque return transactions in the transaction list
+ * @param transactions Array of transactions to analyze
+ * @returns Array of detected cheque returns
+ */
+export function detectChequeReturns(transactions: Transaction[]): ChequeReturn[] {
     const chequeReturnKeywords = [
       'cheque return', 'chq ret', 'return cheque', 'bounced cheque',
       'insufficient funds', 'refer to drawer', 'payment stopped'
@@ -173,7 +405,12 @@ function detectChequeReturns(transactions: Transaction[]): ChequeReturn[] {
     return returns
 }
 
-function analyzeCashflow(transactions: Transaction[]): CashflowAnalysis {
+/**
+ * Analyzes cashflow patterns from transactions
+ * @param transactions Array of transactions to analyze
+ * @returns CashflowAnalysis object with monthly trends and metrics
+ */
+export function analyzeCashflow(transactions: Transaction[]): CashflowAnalysis {
     // Group transactions by month
     const monthlyData = new Map<string, { credits: number; debits: number; endBalance: number }>()
     

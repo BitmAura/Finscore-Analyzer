@@ -25,8 +25,8 @@ export const GET: any = async (request: NextRequest, context: any) => {
   }
 
   // Initialize Supabase server client
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
   try {
     // Verify authentication

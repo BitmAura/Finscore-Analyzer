@@ -37,9 +37,10 @@ export default function DirectLoginTest() {
         
         // Wait a moment for cookie to be set
         setTimeout(() => {
-          router.push('/analyst-dashboard')
-        }, 500)
-        
+          router.push('/dashboard')
+          router.refresh();
+        }, 1000);
+
       } else {
         console.log('❌ [DIRECT LOGIN] Authentication failed:', data.error)
       }

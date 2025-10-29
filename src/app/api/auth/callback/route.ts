@@ -9,17 +9,16 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     try {
-      const supabase = createRouteHandlerClient({ cookies });
+      const cookieStore = await cookies();
+      const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
       await supabase.auth.exchangeCodeForSession(code);
     } catch (error) {
       console.error('Auth callback error:', error);
-      // Redirect to an error page or login page with an error message
       const errorUrl = new URL('/login', request.url);
       errorUrl.searchParams.set('error', 'Failed to sign in with Google.');
       return NextResponse.redirect(errorUrl);
     }
   }
 
-  // URL to redirect to after the sign-in process completes
-  return NextResponse.redirect(`${requestUrl.origin}/analyst-dashboard`);
+  return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
 }

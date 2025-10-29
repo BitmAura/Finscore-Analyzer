@@ -6,16 +6,13 @@ export async function POST(request: Request) {
   try {
     const { newPassword } = await request.json();
     
-    // This creates a Supabase client that can be used in Server Components and Route Handlers.
-    // It securely reads the session from the request cookies.
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
     if (!newPassword || newPassword.length < 8) {
       return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 });
     }
 
-    // The user's session is automatically inferred from the cookies.
-    // When the user clicks the reset link, Supabase sets a temporary session cookie.
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword,
     });

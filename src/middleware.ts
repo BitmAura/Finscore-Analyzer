@@ -4,13 +4,6 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-
-  // In development, skip middleware redirects so client-side session initialization
-  // can complete and we can debug navigation without server-side redirects interfering.
-  if (process.env.NODE_ENV !== 'production') {
-    return res;
-  }
-
   const supabase = createMiddlewareClient({ req, res });
 
   const {
@@ -19,30 +12,49 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // If the user is not logged in and tries to access a protected route, redirect to login.
-  if (!session && pathname.startsWith('/analyst-dashboard')) {
+  // Public routes that don't require authentication
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
+
+  // Protected routes that require authentication
+  const protectedRoutes = [
+    '/dashboard',
+    '/analyst-dashboard',
+    '/my-reports',
+    '/documents',
+    '/profile',
+    '/security'
+  ];
+
+  // If user is logged in and tries to access auth pages, redirect to dashboard
+  if (session && publicRoutes.includes(pathname)) {
     const url = req.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/analyst-dashboard';
     return NextResponse.redirect(url);
   }
 
-  // If the user is logged in and tries to access a public auth page (like login/signup), redirect to the dashboard.
-  if (session && (pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password' || pathname === '/reset-password')) {
+  // If user is not logged in and tries to access protected routes, redirect to login
+  if (!session && protectedRoutes.some(route => pathname.startsWith(route))) {
     const url = req.nextUrl.clone();
-    url.pathname = '/analyst-dashboard';
+    url.pathname = '/login';
+    url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
   return res;
 }
 
-// Configure the middleware to run on specific paths.
 export const config = {
   matcher: [
-    '/analyst-dashboard/:path*',
+    '/',
     '/login',
     '/signup',
     '/forgot-password',
     '/reset-password',
+    '/dashboard/:path*',
+    '/analyst-dashboard/:path*',
+    '/my-reports/:path*',
+    '/documents/:path*',
+    '/profile/:path*',
+    '/security/:path*'
   ],
 };

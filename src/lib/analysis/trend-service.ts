@@ -26,7 +26,7 @@ const getAmount = (tx: Transaction): number => {
  * @param transactions A list of transactions.
  * @returns An array of identified trends.
  */
-export const detectSpendingTrends = (transactions: (Transaction & { category: TransactionCategory })[]): Trend[] => {
+export function detectSpendingTrends(transactions: (Transaction & { category: TransactionCategory })[]): Trend[] {
   const monthlySpending: { [month: string]: { [category: string]: number } } = {};
   const now = new Date();
 
@@ -94,7 +94,7 @@ export const detectSpendingTrends = (transactions: (Transaction & { category: Tr
  * @param transactions A list of transactions.
  * @returns An array of identified anomalies.
  */
-export const detectAnomalies = (transactions: Transaction[]): Anomaly[] => {
+export function detectAnomalies(transactions: Transaction[]): Anomaly[] {
   const expenses = transactions
     .map(tx => ({ tx, amount: getAmount(tx) }))
     .filter(x => x.amount < 0)

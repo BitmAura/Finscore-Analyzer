@@ -183,7 +183,6 @@ const CreateNewReportModal: React.FC<CreateNewReportModalProps> = ({
       {isOpen && (
         <Dialog
           as={motion.div}
-          static
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -332,6 +331,7 @@ const CreateNewReportModal: React.FC<CreateNewReportModalProps> = ({
                     <input
                       type="file"
                       id="file-upload"
+                      data-testid="file-upload-input"
                       className="sr-only"
                       multiple
                       accept=".pdf,.csv,.xlsx,.xls"

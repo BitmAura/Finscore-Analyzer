@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts', '@testing-library/jest-dom'],
+    setupFiles: ['./tests/setup.tsx', '@testing-library/jest-dom'],
     globals: true,
     // Exclude E2E and example Playwright tests from Vitest (they run with Playwright separately)
     exclude: ['**/tests/e2e/**', '**/e2e/**', '**/tests-examples/**', '**/node_modules/**'],
@@ -21,9 +21,17 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'tests/',
-        '**/*.d.ts',
-        '**/*.config.*',
+        'e2e/',
+        '.next/',
         'coverage/',
+        'playwright-report/',
+        'dist/',
+        'build/',
+        '**/*.d.ts',
+        '**/*config.*',
+        '**/*setup.*',
+        'src/types/',
+        'src/test/',
       ],
       thresholds: {
         global: {

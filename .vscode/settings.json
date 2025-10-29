@@ -1,4 +1,12 @@
 {
+  "chat.mcp.servers": {
+    "java-modernization": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp-java-modernization/dist/index.js"
+      ]
+    }
+  },
   "css.validate": false,
   "scss.validate": false,
   "less.validate": false,
@@ -32,5 +40,6 @@
       "password": "postgres",
       "connectionTimeout": 10
     }
-  ]
+  ],
+  "java.compile.nullAnalysis.mode": "automatic"
 }

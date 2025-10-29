@@ -17,8 +17,8 @@ import {
   Counterparty 
 } from '../analysis/counterparty-service';
 import { 
-  calculateMonthlySummaries, 
-  MonthlySummary 
+  generateMonthlySummaries,
+  MonthlySummary
 } from '../analysis/monthly-summary-service';
 import { 
   detectRedAlerts, 
@@ -29,8 +29,8 @@ import {
   RiskAssessment 
 } from '../analysis/risk-service';
 import { 
-  calculateSummary, 
-  FinancialSummary 
+  analyzeSummary,
+  FinancialSummary
 } from '../analysis/summary-service';
 import { routeToParser } from '../parsing/master-parser';
 import { Transaction } from '../parsing/transaction-parser';
@@ -150,18 +150,20 @@ export class FinScoreService {
       // routeToParser returns a ParseResult (transactions + accountDetails). Normalize to the transactions array.
       const transactionsArray: Transaction[] = Array.isArray(parseResult) ? parseResult : (parseResult as any).transactions || [];
 
-      const summary = calculateSummary(transactionsArray);
-      const categorizedTransactions = await categorizeAllTransactions(transactionsArray);
+      // Categorize transactions first
+      const categorizedTransactions = categorizeAllTransactions(transactionsArray);
+
+      const summary = analyzeSummary(categorizedTransactions);
       const counterparties = analyzeCounterparties(categorizedTransactions as any);
-      const monthlySummaries = calculateMonthlySummaries(transactionsArray);
-      const redAlerts = detectRedAlerts(transactionsArray);
-      const riskAssessment = assessRisk(transactionsArray);
+      const monthlySummaries = generateMonthlySummaries(transactionsArray);
+      const redAlerts = detectRedAlerts(categorizedTransactions);
+      const riskAssessment = assessRisk(categorizedTransactions, summary);
 
       const result: AnalysisResult = {
         summary,
-        categorizedTransactions,
+        categorizedTransactions: categorizedTransactions as any,
         counterparties,
-        monthlySummaries,
+        monthlySummaries: monthlySummaries.monthlySummaries,
         redAlerts,
         riskAssessment,
       };
@@ -275,8 +277,8 @@ export class ReportGenerator {
       riskChart: {
         type: 'gauge',
         data: {
-          score: result.riskAssessment.overallScore,
-          factors: result.riskAssessment.factors
+          score: result.riskAssessment.overallRiskScore,
+          factors: result.riskAssessment.riskFactors
         }
       }
     }

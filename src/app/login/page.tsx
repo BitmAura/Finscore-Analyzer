@@ -1,16 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { signIn, signInWithGoogle } from '@/lib/supabase-helpers';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showRateLimitHelp, setShowRateLimitHelp] = useState(false);
   const router = useRouter();
+
+  const clearLocalRateLimit = () => {
+    if (email) {
+      try {
+        localStorage.removeItem(`login_attempts_${email}`);
+        setError('✅ Rate limit cleared! You can try logging in again.');
+        setShowRateLimitHelp(false);
+        setTimeout(() => setError(null), 3000);
+      } catch (err) {
+        console.error('Failed to clear rate limit:', err);
+      }
+    }
+  };
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -18,29 +32,38 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error("Supabase login error:", error);
-        setError(`Login Failed: ${error.message}`);
-        setIsLoading(false);
-        return;
-      }
-
-      if (data.session) {
-        // Force a hard navigation to ensure middleware runs
-        window.location.href = '/analyst-dashboard';
-      } else {
-        setError('Login did not return a session. Please check your credentials and try again.');
-        setIsLoading(false);
-      }
-
+      await signIn(email, password);
+      setIsLoading(false);
+      router.push('/dashboard');
+      router.refresh();
     } catch (err: any) {
-      console.error("Login form submission error:", err);
-      setError(`An unexpected error occurred: ${err.message}`);
+      console.error('Login error:', err);
+
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      let isRateLimitError = false;
+
+      // Handle specific error types
+      if (err?.message) {
+        if (err.message.includes('rate limit') || err.message.includes('Too many')) {
+          isRateLimitError = true;
+          if (err.message.includes('from Supabase')) {
+            errorMessage = '⚠️ Too many login attempts detected by Supabase. Please wait 5-10 minutes before trying again.';
+          } else {
+            errorMessage = '⚠️ Too many login attempts. Click "Clear Rate Limit" below or wait 2 minutes.';
+          }
+        } else if (err.message.includes('Invalid login credentials') || err.message.includes('Invalid')) {
+          errorMessage = '❌ Invalid email or password. Please check your credentials.';
+        } else if (err.message.includes('Email not confirmed')) {
+          errorMessage = '📧 Please verify your email address before logging in. Check your inbox.';
+        } else if (err.message.includes('network') || err.message.includes('timeout')) {
+          errorMessage = '🌐 Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
+      setShowRateLimitHelp(isRateLimitError);
       setIsLoading(false);
     }
   };
@@ -49,15 +72,12 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/analyst-dashboard`,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
+    try {
+      await signInWithGoogle();
+      // OAuth will redirect to callback, no further action here
+    } catch (err: any) {
+      console.error('Google login error:', err);
+      setError(err?.message || 'Unable to connect to Google authentication. Please try again.');
       setIsLoading(false);
     }
   };
@@ -65,6 +85,29 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-xl">
+        {/* Back to Home Button */}
+        <div className="flex justify-start">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back to Home
+          </Link>
+        </div>
+
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
@@ -74,6 +117,37 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-gray-800">Sign In</h1>
           <p className="mt-2 text-sm text-gray-600">Welcome back to FinScore Analyzer</p>
         </div>
+
+        {error && (
+          <div className={`p-4 border rounded-lg ${error.includes('✅') ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <p className={`text-sm ${error.includes('✅') ? 'text-green-800' : 'text-red-800'}`}>{error}</p>
+            {error.includes('Network') && (
+              <div className="mt-2 text-xs text-red-600">
+                <p>Troubleshooting steps:</p>
+                <ul className="list-disc list-inside mt-1">
+                  <li>Check your internet connection</li>
+                  <li>Disable VPN or proxy if enabled</li>
+                  <li>Try refreshing the page</li>
+                  <li>Clear browser cache and cookies</li>
+                </ul>
+              </div>
+            )}
+            {showRateLimitHelp && !error.includes('Supabase') && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={clearLocalRateLimit}
+                  className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Clear Rate Limit (Client-Side)
+                </button>
+                <p className="text-xs text-red-600 mt-2">
+                  If this doesn&apos;t work, the rate limit is from Supabase server. Wait 5-10 minutes.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -88,6 +162,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
+              disabled={isLoading}
             />
           </div>
 
@@ -103,21 +178,44 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="••••••••"
+              disabled={isLoading}
             />
           </div>
 
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-              {error}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                Remember me
+              </label>
             </div>
-          )}
+
+            <div className="text-sm">
+              <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+            </div>
+          </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+            ) : (
+              'Sign In'
+            )}
           </button>
         </form>
 
@@ -133,7 +231,7 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+          className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -144,18 +242,9 @@ export default function LoginPage() {
           Google
         </button>
 
-        <div className="text-center text-sm">
-          <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800 font-medium">
-            Forgot your password?
-          </Link>
-        </div>
-
-        <div className="text-center text-sm">
-          <span className="text-gray-600">Don&apos;t have an account? </span>
-          <Link href="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
-            Sign up
-          </Link>
-        </div>
+        <p className="text-center text-sm text-gray-600">
+          Don&apos;t have an account?{' '}          <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
+        </p>
       </div>
     </div>
   );

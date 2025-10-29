@@ -5,10 +5,12 @@
 -- 1) Insert 120 sample documents
 -- Note: many deployments of this project use `file_path`, `file_type`, `file_size`, `detected_bank`, and `status` columns
 -- (some schemas don't have `created_at` or `url`). This INSERT targets those columns to avoid missing-column errors.
-INSERT INTO public.documents (id, user_id, name, file_path, file_type, file_size, detected_bank, status)
+-- Include original_name to satisfy schemas where it's NOT NULL (use same value as name)
+INSERT INTO public.documents (id, user_id, name, original_name, file_path, file_type, file_size, detected_bank, status)
 SELECT
   gen_random_uuid(),
   'REPLACE_WITH_USER_UUID'::uuid,
+  format('sample-statement-%s.pdf', i),
   format('sample-statement-%s.pdf', i),
   format('documents/%s/sample-statement-%s.pdf', 'REPLACE_WITH_USER_UUID', i),
   'application/pdf',

@@ -1,14 +1,14 @@
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
 import pdf from 'pdf-parse';
 import qpdf from 'node-qpdf';
 import { routeToParser } from '@/lib/parsing/master-parser';
 import { Transaction } from '@/lib/parsing/transaction-parser';
-import { calculateSummary } from '@/lib/analysis/summary-service';
+import { analyzeSummary } from '@/lib/analysis/summary-service';
 import { detectRedAlerts } from '@/lib/analysis/red-alert-service';
-import { calculateMonthlySummaries } from '@/lib/analysis/monthly-summary-service';
+import { generateMonthlySummaries } from '@/lib/analysis/monthly-summary-service';
 import { categorizeAllTransactions } from '@/lib/analysis/categorization-service';
 import { analyzeCounterparties } from '@/lib/analysis/counterparty-service';
-import { assessRisk } from '@/lib/analysis/risk-service';
+import { analyzeTransactionPatterns } from '@/lib/analysis/risk-service';
 import { detectSpendingTrends, detectAnomalies } from '@/lib/analysis/trend-service';
 import { saveTransactions } from '@/lib/supabase-helpers';
 import { generateExecutiveSummary } from '@/lib/ai-analysis';
@@ -26,20 +26,21 @@ async function downloadFile(filePath: string) {
     return data.arrayBuffer();
 }
 
-async function analyzeJob(jobId: string) {
+export default async function analyzeJob(jobId: string) {
     console.log(`Starting analysis for job ${jobId}`);
 
     try {
-        const { data: job, error: jobError } = await supabase
-            .from('analysis_jobs')
-            .select('*')
-            .eq('id', jobId)
-            .single();
+    const { data: job, error: jobError } = await supabase
+        .from('analysis_jobs')
+        .select('*')
+        .eq('id', jobId)
+        .single();
 
-        if (jobError || !job) {
-            console.error(`Job not found for id: ${jobId}`, { jobError });
-            throw new Error('Job not found');
-        }
+    if (jobError || !job) {
+        console.error(`Job not found for id: ${jobId}`, { jobError });
+        await supabase.from('analysis_jobs').update({ status: 'failed', summary: { error: 'Job not found' } }).eq('id', jobId);
+        return;
+    }
 
         await supabase.from('analysis_jobs').update({ status: 'processing' }).eq('id', jobId);
 
@@ -92,13 +93,14 @@ async function analyzeJob(jobId: string) {
 
         allTransactions.sort((a: Transaction, b: Transaction) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        const summary = calculateSummary(allTransactions);
-        const redAlerts = detectRedAlerts(allTransactions);
-        const monthlySummaries = calculateMonthlySummaries(allTransactions);
         const categorizedTransactions = await categorizeAllTransactions(allTransactions);
+        const summary = analyzeSummary(categorizedTransactions);
+        const redAlerts = detectRedAlerts(allTransactions);
+        const monthlySummariesResult = generateMonthlySummaries(allTransactions);
+        const monthlySummaries = monthlySummariesResult.monthlySummaries;
         const counterparties = analyzeCounterparties(categorizedTransactions);
-        const riskAssessment = assessRisk(allTransactions);
-        const trends = detectSpendingTrends(categorizedTransactions);
+        const riskAssessment = analyzeTransactionPatterns(allTransactions);
+        const trends = detectSpendingTrends(categorizedTransactions as any);
         const anomalies = detectAnomalies(allTransactions);
 
         const aiExecutiveSummary = await generateExecutiveSummary(
@@ -132,4 +134,3 @@ async function analyzeJob(jobId: string) {
     }
 }
 
-export default analyzeJob

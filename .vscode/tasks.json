@@ -7,7 +7,43 @@
 			"command": "npm run dev",
 			"isBackground": true,
 			"problemMatcher": [],
-			"group": "serve"
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "Run Demo (Debug)",
+			"type": "shell",
+			"command": "mvn",
+			"args": [
+				"-f",
+				"${workspaceFolder}/mcp-java-modernization/demo-java-project/pom.xml",
+				"spring-boot:run",
+				"-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "Run Selenium E2E",
+			"type": "shell",
+			"command": "cmd.exe",
+			"args": ["/c", "mvn", "-f", "${workspaceFolder}/e2e-selenium/pom.xml", "test"],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"env": {
+					"BASE_URL": "http://localhost:3000",
+					"HEADLESS": "true"
+				}
+			}
 		}
 	]
 }

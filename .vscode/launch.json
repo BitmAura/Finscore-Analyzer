@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Demo (Java)",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "com.example.demo.DemoApplication",
+      "cwd": "${workspaceFolder}/mcp-java-modernization/demo-java-project"
+    },
+    {
+      "name": "Attach to Spring Boot (5005)",
+      "type": "java",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005
+    }
+  ]
+}

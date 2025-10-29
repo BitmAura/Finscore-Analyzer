@@ -3,13 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { useAuthReady } from '@/contexts/AuthReadyContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isAuthenticated, logout } = useAuthReady();
+
+  // Hide sidebar if user is not authenticated
+  if (!isAuthenticated) return null;
 
   const navItems = [
     {
-      href: '/analyst-dashboard',
+      href: '/dashboard',
       label: 'Dashboard',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,6 +105,14 @@ export default function Sidebar() {
       <div className="p-4 border-t border-gray-700">
         <div className="text-xs text-gray-400 text-center">
           FinScore Analyzer v1.0
+        </div>
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={() => logout()}
+            className="px-3 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </aside>

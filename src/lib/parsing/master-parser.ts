@@ -74,3 +74,8 @@ export const routeToParser = (text: string, job_id: string, password?: string): 
     }
   };
 };
+
+/**
+ * Parse master format - alias for routeToParser for backward compatibility
+ */
+export const parseMasterFormat = routeToParser;

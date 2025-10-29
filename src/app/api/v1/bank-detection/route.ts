@@ -122,8 +122,8 @@ function detectBankFromContent(text: string) {
 
 export async function POST(request: NextRequest) {
   // Initialize Supabase server client
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
 
   try {
     // Verify authentication

@@ -60,11 +60,11 @@ function SignInComponent() {
         if (result.user && !result.session) {
           setError('Please check your email to confirm your account before signing in.');
         } else {
-          router.push('/analyst-dashboard');
+          router.push('/dashboard');
         }
       } else {
         await signIn(email, password);
-        router.push('/analyst-dashboard');
+        router.push('/dashboard');
       }
     } catch (err: any) {
       console.error('Email auth error:', err);

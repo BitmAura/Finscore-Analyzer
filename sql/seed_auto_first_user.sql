@@ -5,11 +5,12 @@
 WITH first_user AS (
   SELECT id FROM auth.users WHERE id IS NOT NULL LIMIT 1
 )
--- Insert 120 sample documents for that user
-INSERT INTO public.documents (id, user_id, name, file_path, file_type, file_size, detected_bank, status)
+-- Note: many deployments require original_name NOT NULL. We insert it equal to name for seeds.
+INSERT INTO public.documents (id, user_id, name, original_name, file_path, file_type, file_size, detected_bank, status)
 SELECT
   gen_random_uuid(),
   fu.id,
+  format('sample-statement-%s.pdf', i),
   format('sample-statement-%s.pdf', i),
   format('documents/%s/sample-statement-%s.pdf', fu.id::text, i),
   'application/pdf',

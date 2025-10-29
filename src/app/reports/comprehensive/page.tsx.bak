@@ -1,0 +1,889 @@
+'use client'
+
+import { useState } from 'react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { BarChart, LineChart, DoughnutChart } from '@/components/analytics/Charts'
+import {
+  ArrowUpRight,
+  Download,
+  Printer,
+  Share2,
+  RefreshCw,
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  InfoIcon,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  CreditCard,
+  Banknote,
+} from 'lucide-react'
+
+interface Transaction {
+  id: string
+  date: string
+  description: string
+  amount: number
+  type: 'credit' | 'debit'
+  category: string
+  balance: number
+}
+
+interface Anomaly {
+  id: string
+  type: string
+  description: string
+  severity: 'high' | 'medium' | 'low'
+  date: string
+  amount: number
+  recommendation: string
+}
+
+interface AccountSummary {
+  accountNumber: string
+  accountName: string
+  bankName: string
+  period: {
+    start: string
+    end: string
+  }
+  openingBalance: number
+  closingBalance: number
+  totalCredits: number
+  totalDebits: number
+  totalTransactions: number
+  averageDailyBalance: number
+  financialHealthScore: number
+}
+
+export default function ComprehensiveReportPage() {
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview')
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+
+  // Simulated data for demonstration
+  const accountSummary: AccountSummary = {
+    accountNumber: 'XXXX-XXXX-2386',
+    accountName: 'Business Operations',
+    bankName: 'First National Bank',
+    period: {
+      start: '2025-09-01',
+      end: '2025-09-30'
+    },
+    openingBalance: 112345.67,
+    closingBalance: 124567.89,
+    totalCredits: 45780.29,
+    totalDebits: 32450.56,
+    totalTransactions: 127,
+    averageDailyBalance: 118456.78,
+    financialHealthScore: 87
+  }
+
+  const recentTransactions: Transaction[] = [
+    {
+      id: 'tx1',
+      date: '2025-09-30',
+      description: 'Client Payment - ABC Corp',
+      amount: 12500.00,
+      type: 'credit',
+      category: 'Sales',
+      balance: 124567.89
+    },
+    {
+      id: 'tx2',
+      date: '2025-09-28',
+      description: 'Office Rent Payment',
+      amount: 4800.00,
+      type: 'debit',
+      category: 'Rent',
+      balance: 112067.89
+    },
+    {
+      id: 'tx3',
+      date: '2025-09-25',
+      description: 'Cloud Services - Monthly',
+      amount: 1250.75,
+      type: 'debit',
+      category: 'Software',
+      balance: 116867.89
+    },
+    {
+      id: 'tx4',
+      date: '2025-09-20',
+      description: 'Client Payment - XYZ Ltd',
+      amount: 8750.50,
+      type: 'credit',
+      category: 'Sales',
+      balance: 118118.64
+    }
+  ]
+
+  const anomalies: Anomaly[] = [
+    {
+      id: 'a1',
+      type: 'Large Transaction',
+      description: 'Unusually large payment to vendor "Tech Supplies Inc"',
+      severity: 'medium',
+      date: '2025-09-15',
+      amount: 7895.43,
+      recommendation: 'Verify this payment against invoices and ensure proper authorization'
+    },
+    {
+      id: 'a2',
+      type: 'Duplicate Payment',
+      description: 'Potential duplicate payment to "Office Supplies Co"',
+      severity: 'high',
+      date: '2025-09-22',
+      amount: 1245.00,
+      recommendation: 'Check if this is a duplicate of payment made on 2025-09-21'
+    },
+    {
+      id: 'a3',
+      type: 'Unusual Activity',
+      description: 'Weekend transaction outside of normal business hours',
+      severity: 'low',
+      date: '2025-09-14',
+      amount: 450.25,
+      recommendation: 'Confirm this transaction was authorized'
+    }
+  ]
+
+  // Monthly data for charts
+  const monthlyData = {
+    labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+    credits: [32500, 35700, 38200, 40100, 43500, 45780],
+    debits: [28700, 30200, 31500, 32100, 31800, 32450],
+    balance: [103500, 109000, 115700, 123700, 135400, 148730]
+  }
+
+  // Category data for charts
+  const categoryData = {
+    labels: ['Sales', 'Services', 'Investments', 'Other'],
+    data: [65, 20, 10, 5]
+  }
+
+  // Expense category data
+  const expenseData = {
+    labels: ['Rent', 'Salaries', 'Software', 'Marketing', 'Office', 'Other'],
+    data: [25, 40, 15, 10, 5, 5]
+  }
+
+  const generateAISummary = () => {
+    setIsGeneratingAI(true)
+
+    // Simulate AI processing delay
+    setTimeout(() => {
+      setAiSummary(`# Executive Financial Summary
+
+## Overall Performance
+The financial performance for September 2025 shows positive momentum with a **10.9% increase** in account balance over the period. The closing balance of $124,567.89 represents a healthy cash position, with total credits exceeding debits by $13,329.73.
+
+## Key Insights
+1. **Revenue Growth**: Income sources show consistent patterns with two major client payments totaling $21,250.50, indicating strong customer relationships.
+
+2. **Expense Management**: Operating expenses remain well-controlled at $32,450.56, which is only a 2% increase from the previous month despite business growth.
+
+3. **Cash Flow**: The positive cash flow trend continues with an average daily balance of $118,456.78, providing sufficient liquidity for operations.
+
+## Risk Factors
+- Three anomalies were detected, including a potential duplicate payment of $1,245.00 that should be investigated immediately.
+- Weekend transaction activity outside normal business hours may indicate irregular operating procedures.
+
+## Recommendations
+1. **Formalize Recurring Revenue**: The consistent payments from ABC Corp and XYZ Ltd suggest an opportunity to establish formal recurring revenue agreements.
+
+2. **Review Vendor Payment Controls**: Implement additional authorization steps for payments exceeding $5,000.
+
+3. **Optimize Cash Reserves**: With growing cash reserves, consider allocating a portion to short-term investments to generate additional income.
+
+## 30-Day Outlook
+Based on current trends, we project continued growth with an estimated closing balance of $135,000-$140,000 by the end of October 2025, assuming similar revenue and expense patterns.`)
+
+      setIsGeneratingAI(false)
+    }, 3000)
+  }
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'high':
+        return 'bg-red-100 text-red-800'
+      case 'medium':
+        return 'bg-amber-100 text-amber-800'
+      case 'low':
+        return 'bg-blue-100 text-blue-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <header className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Financial Report: September 2025
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Account {accountSummary.accountNumber} · {accountSummary.accountName}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Printer className="w-4 h-4" />
+              <span>Print</span>
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Download className="w-4 h-4" />
+              <span>Export</span>
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Share2 className="w-4 h-4" />
+              <span>Share</span>
+            </Button>
+            <Button variant="default" size="sm" className="flex items-center gap-1">
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh Data</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-8">
+        <TabsList className="grid grid-cols-5 mb-8">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
+          <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
+          <TabsTrigger value="ai-summary">AI Summary</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Account Summary</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Bank:</span>
+                  <span className="font-medium">{accountSummary.bankName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Period:</span>
+                  <span className="font-medium">
+                    {new Date(accountSummary.period.start).toLocaleDateString()} - {new Date(accountSummary.period.end).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Opening Balance:</span>
+                  <span className="font-medium">${accountSummary.openingBalance.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Closing Balance:</span>
+                  <span className="font-medium">${accountSummary.closingBalance.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-green-600">
+                  <span>Net Change:</span>
+                  <span className="font-medium">
+                    +${(accountSummary.closingBalance - accountSummary.openingBalance).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Transaction Summary</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Total Transactions:</span>
+                  <span className="font-medium">{accountSummary.totalTransactions}</span>
+                </div>
+                <div className="flex justify-between text-green-600">
+                  <span>Total Credits:</span>
+                  <span className="font-medium">+${accountSummary.totalCredits.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-red-600">
+                  <span>Total Debits:</span>
+                  <span className="font-medium">-${accountSummary.totalDebits.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Average Daily Balance:</span>
+                  <span className="font-medium">${accountSummary.averageDailyBalance.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Financial Health Score:</span>
+                  <div className="flex items-center">
+                    <span className="font-medium mr-1">{accountSummary.financialHealthScore}/100</span>
+                    <div className={`w-2 h-2 rounded-full ${accountSummary.financialHealthScore > 80 ? 'bg-green-500' : 
+                      accountSummary.financialHealthScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Key Metrics</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-500">Income/Expense Ratio</span>
+                    <span className="text-sm font-medium">1.41</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full" style={{ width: '70%' }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-500">Cash Flow Stability</span>
+                    <span className="text-sm font-medium">85%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="bg-blue-500 h-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-500">Growth Rate (MoM)</span>
+                    <span className="text-sm font-medium">+10.9%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="bg-purple-500 h-full" style={{ width: '65%' }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-500">Anomaly Risk</span>
+                    <span className="text-sm font-medium">Low</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="bg-amber-500 h-full" style={{ width: '20%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Balance Trend</h3>
+              <div className="h-64">
+                <LineChart
+                  labels={monthlyData.labels}
+                  datasets={[
+                    {
+                      label: 'Account Balance',
+                      data: monthlyData.balance,
+                      borderColor: '#6366f1',
+                      backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Income vs. Expenses</h3>
+              <div className="h-64">
+                <BarChart
+                  labels={monthlyData.labels}
+                  datasets={[
+                    {
+                      label: 'Credits',
+                      data: monthlyData.credits,
+                      backgroundColor: 'rgba(34, 197, 94, 0.7)'
+                    },
+                    {
+                      label: 'Debits',
+                      data: monthlyData.debits,
+                      backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="p-6 col-span-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Income Sources</h3>
+              <div className="h-64">
+                <DoughnutChart
+                  labels={categoryData.labels}
+                  datasets={[
+                    {
+                      data: categoryData.data,
+                      backgroundColor: [
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(249, 115, 22, 0.7)'
+                      ]
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6 col-span-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h3>
+              <div className="h-64">
+                <DoughnutChart
+                  labels={expenseData.labels}
+                  datasets={[
+                    {
+                      data: expenseData.data,
+                      backgroundColor: [
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(14, 165, 233, 0.7)',
+                        'rgba(168, 85, 247, 0.7)',
+                        'rgba(236, 72, 153, 0.7)',
+                        'rgba(107, 114, 128, 0.7)'
+                      ]
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6 col-span-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Transactions</h3>
+              <div className="space-y-3">
+                {recentTransactions.slice(0, 4).map(tx => (
+                  <div key={tx.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        tx.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {tx.type === 'credit' ? (
+                          <ArrowUpRight className={`w-4 h-4 text-green-600`} />
+                        ) : (
+                          <ArrowRight className={`w-4 h-4 text-red-600`} />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{tx.description}</p>
+                        <p className="text-xs text-gray-500">{tx.date}</p>
+                      </div>
+                    </div>
+                    <div className={`font-medium ${
+                      tx.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {tx.type === 'credit' ? '+' : '-'}${tx.amount.toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+                <Button variant="ghost" size="sm" className="w-full text-blue-600">
+                  View All Transactions
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="mt-0">
+          <Card className="p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Transaction List</h3>
+            <p className="text-gray-500 mb-6">Showing all transactions for the selected period</p>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Balance
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Display limited transactions for demo */}
+                  {recentTransactions.map((transaction) => (
+                    <tr key={transaction.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {transaction.date}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {transaction.description}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {transaction.category}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                        transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {transaction.type === 'credit' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${transaction.balance.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-6 text-center">
+              <p className="text-gray-500 text-sm">
+                Showing 4 of {accountSummary.totalTransactions} transactions
+              </p>
+              <Button variant="outline" size="sm" className="mt-2">
+                Load More Transactions
+              </Button>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cashflow" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Monthly Cash Flow</h3>
+              <p className="text-sm text-gray-500 mb-4">6-month trend analysis</p>
+              <div className="h-72">
+                <BarChart
+                  labels={monthlyData.labels}
+                  datasets={[
+                    {
+                      label: 'Income',
+                      data: monthlyData.credits,
+                      backgroundColor: 'rgba(34, 197, 94, 0.7)'
+                    },
+                    {
+                      label: 'Expenses',
+                      data: monthlyData.debits,
+                      backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Net Cash Flow</h3>
+              <p className="text-sm text-gray-500 mb-4">Net monthly difference</p>
+              <div className="h-72">
+                <LineChart
+                  labels={monthlyData.labels}
+                  datasets={[
+                    {
+                      label: 'Net Cash Flow',
+                      data: monthlyData.credits.map((val, idx) => val - monthlyData.debits[idx]),
+                      borderColor: '#8b5cf6',
+                      backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+          </div>
+
+          <Card className="p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Cash Flow Patterns</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900">Recurring Income</h4>
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                    $24,500 / mo
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">
+                  3 identified recurring income sources
+                </p>
+                <div className="mt-3">
+                  <Button variant="outline" size="sm">View Details</Button>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900">Recurring Expenses</h4>
+                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                    $18,750 / mo
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">
+                  7 identified recurring expenses
+                </p>
+                <div className="mt-3">
+                  <Button variant="outline" size="sm">View Details</Button>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900">Seasonal Patterns</h4>
+                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    Detected
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Quarterly revenue increase pattern
+                </p>
+                <div className="mt-3">
+                  <Button variant="outline" size="sm">View Analysis</Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="anomalies" className="mt-0">
+          <Card className="p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Anomaly Detection</h3>
+                <p className="text-gray-500">
+                  Our AI has identified {anomalies.length} potential anomalies in your transactions
+                </p>
+              </div>
+              <Button variant="outline" className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Report New Anomaly</span>
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {anomalies.map(anomaly => (
+                <div key={anomaly.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-amber-100">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{anomaly.type}</h4>
+                        <p className="text-sm text-gray-600">{anomaly.description}</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${getSeverityColor(anomaly.severity)}`}>
+                      {anomaly.severity.charAt(0).toUpperCase() + anomaly.severity.slice(1)} Severity
+                    </span>
+                  </div>
+
+                  <div className="mt-3 pl-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Date: </span>
+                        <span className="font-medium">{anomaly.date}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Amount: </span>
+                        <span className="font-medium">${anomaly.amount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="text-gray-500 text-sm">Recommendation: </span>
+                      <span className="text-sm">{anomaly.recommendation}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pl-10 flex space-x-3">
+                    <Button size="sm" variant="outline" className="flex items-center">
+                      <CheckCircle2 className="w-4 h-4 mr-1" />
+                      Mark as Resolved
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex items-center">
+                      <XCircle className="w-4 h-4 mr-1" />
+                      Dismiss
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex items-center">
+                      <InfoIcon className="w-4 h-4 mr-1" />
+                      More Info
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Transaction Risk Score</h3>
+              <div className="h-64">
+                <BarChart
+                  labels={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']}
+                  datasets={[
+                    {
+                      label: 'Risk Score',
+                      data: [15, 12, 18, 8, 5, 10, 7, 11, 15],
+                      backgroundColor: 'rgba(245, 158, 11, 0.7)'
+                    }
+                  ]}
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Anomaly History</h3>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                    <th className="py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detected</th>
+                    <th className="py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resolved</th>
+                    <th className="py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  <tr>
+                    <td className="py-3 text-sm">September</td>
+                    <td className="py-3 text-sm">3</td>
+                    <td className="py-3 text-sm">0</td>
+                    <td className="py-3 text-sm">3</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 text-sm">August</td>
+                    <td className="py-3 text-sm">2</td>
+                    <td className="py-3 text-sm">2</td>
+                    <td className="py-3 text-sm">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 text-sm">July</td>
+                    <td className="py-3 text-sm">1</td>
+                    <td className="py-3 text-sm">1</td>
+                    <td className="py-3 text-sm">0</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 text-sm">June</td>
+                    <td className="py-3 text-sm">4</td>
+                    <td className="py-3 text-sm">4</td>
+                    <td className="py-3 text-sm">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ai-summary" className="mt-0">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">AI Executive Summary</h3>
+                <p className="text-gray-500">
+                  Advanced analysis of your financial data with personalized insights
+                </p>
+              </div>
+
+              <Button
+                onClick={generateAISummary}
+                disabled={isGeneratingAI}
+                className="flex items-center gap-2"
+              >
+                {isGeneratingAI ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="w-4 h-4" />
+                    <span>{aiSummary ? 'Regenerate' : 'Generate'} Summary</span>
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {!aiSummary && !isGeneratingAI && (
+              <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+                <div className="mb-4">
+                  <TrendingUp className="w-12 h-12 mx-auto text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Generate AI Executive Summary
+                </h3>
+                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                  Let our AI analyze your financial data and generate a comprehensive executive summary with insights and recommendations.
+                </p>
+                <Button onClick={generateAISummary}>
+                  Generate Summary
+                </Button>
+              </div>
+            )}
+
+            {isGeneratingAI && (
+              <div className="text-center py-12 border border-gray-200 rounded-lg">
+                <div className="mb-4">
+                  <div className="w-12 h-12 mx-auto border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Generating Financial Insights
+                </h3>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Our AI is analyzing your financial data, identifying patterns, and preparing personalized recommendations.
+                </p>
+              </div>
+            )}
+
+            {aiSummary && !isGeneratingAI && (
+              <div className="border border-gray-200 rounded-lg p-6 prose max-w-none">
+                <div dangerouslySetInnerHTML={{
+                  __html: aiSummary
+                    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mb-4">$1</h1>')
+                    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
+                    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                    .replace(/^([0-9]+\. )(.*$)/gim, '<p class="mb-2"><span class="font-medium">$1</span>$2</p>')
+                    .replace(/\n/g, '<br />')
+                }} />
+
+                <div className="mt-6 flex justify-between">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </Button>
+
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share Summary
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+// Mock chart components - In a real implementation, you'd use a charting library
+export function BarChart({ labels, datasets }: { labels: string[]; datasets: any[] }) {
+  return (
+    <div className="h-full w-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+      <p className="text-gray-500">Bar Chart Visualization</p>
+    </div>
+  )
+}
+
+export function LineChart({ labels, datasets }: { labels: string[]; datasets: any[] }) {
+  return (
+    <div className="h-full w-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+      <p className="text-gray-500">Line Chart Visualization</p>
+    </div>
+  )
+}
+
+export function DoughnutChart({ labels, datasets }: { labels: string[]; datasets: any[] }) {
+  return (
+    <div className="h-full w-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+      <p className="text-gray-500">Doughnut Chart Visualization</p>
+    </div>
+  )
+}

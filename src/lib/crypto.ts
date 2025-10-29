@@ -27,3 +27,7 @@ export async function decrypt(text: string) {
     const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
     return decrypted.toString();
 }
+
+export async function decryptData(encryptedData: string): Promise<string> {
+  return decrypt(encryptedData);
+}

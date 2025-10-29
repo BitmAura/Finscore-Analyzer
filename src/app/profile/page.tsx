@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase'; // Unified client
+import supabase from '../../lib/supabase'; // Unified client
 import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
+import { signOut as signOutHelper } from '@/lib/supabase-helpers';
+import { useAuthReady } from '@/contexts/AuthReadyContext';
 
 export default function ProfilePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -16,32 +18,22 @@ export default function ProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const router = useRouter();
   const user = useUser();
+  const { isAuthReady, isAuthenticated } = useAuthReady();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthChecked(true);
-        console.debug('[Profile] session check:', session);
-        if (!session) {
-          console.debug('[Profile] No session found, redirecting to /login');
-          router.push('/login');
-          return;
-        }
-        const userEmailFromSession = session?.user?.email ?? null;
-        console.debug('[Profile] user from hook:', user, 'emailFromSession:', userEmailFromSession);
-        setUserEmail(user?.email ?? userEmailFromSession);
-        setNewEmail(user?.email ?? userEmailFromSession ?? '');
-      } catch (err) {
-        setIsAuthChecked(true);
-        console.error('[Profile] error checking auth session:', err);
-        router.push('/login');
-      }
-    };
+    if (!isAuthReady) return;
+    setIsAuthChecked(true);
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
 
-    checkAuth();
-  }, [router, user]);
+    // populate user info from auth helper
+    const emailFromUser = user?.email ?? null;
+    setUserEmail(emailFromUser);
+    setNewEmail(emailFromUser ?? '');
+  }, [isAuthReady, isAuthenticated, user?.email, router]);
 
   const handleDeleteAccount = async () => {
     setIsLoading(true);
@@ -49,10 +41,11 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) {
-        setError(`Error signing out: ${signOutError.message}`);
-        console.error(`Account Deletion Failed: Error signing out: ${signOutError.message}`);
+      // Use centralized signOut helper so server-side cookies are cleared
+      const result = await signOutHelper();
+      if (!result) {
+        setError('Error signing out during account deletion. Please try again.');
+        console.error('Account Deletion Failed: signOutHelper returned false');
         return;
       }
 

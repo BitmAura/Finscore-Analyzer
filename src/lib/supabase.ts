@@ -1,30 +1,48 @@
-// src/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validate environment variables are set
+// Validate configuration - only warn in development, don't throw
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Check your .env.local file.');
-  // Provide fallbacks to prevent hard crashes, but authentication won't work
-  // This helps with build processes where env vars might not be available
+  console.error(
+    '❌ Missing Supabase environment variables.\n' +
+    'Please check your .env.local file and ensure these are set:\n' +
+    '  NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co\n' +
+    '  NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...'
+  );
+  // Create a dummy client that won't crash the app
+  // This allows the app to load even if Supabase is not configured
 }
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
+const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseAnonKey || 'placeholder-key',
   {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
-      storageKey: 'finscore-auth-storage',
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    },
+    global: {
+      headers: {
+        'x-client-info': 'finscore-analyzer',
+      },
+    },
+    db: {
+      schema: 'public',
     },
   }
 );
 
-// Export the client as default for backwards compatibility
+// Test connection on initialization (client-side only)
+// Don't let this block the app from loading
+if (typeof window !== 'undefined' && supabaseUrl && supabaseAnonKey) {
+  supabase.auth.getSession().catch((error) => {
+    console.warn('⚠️ Supabase session check failed (non-blocking):', error.message);
+  });
+}
+
 export default supabase;

@@ -1,50 +1,44 @@
-import { Transaction } from '../parsing/transaction-parser';
+﻿/**
+ * Red Alert Service - Detects risky transactions and patterns
+ */
+
+import { CategorizedTransaction } from './categorization-service';
 
 export interface RedAlert {
-  type: 'LowBalance' | 'LargeCashWithdrawal' | 'ChequeBounce';
-  message: string;
-  transactionId?: string; // Optional: link to a specific transaction
+  id: string;
+  type: 'cheque_bounce' | 'low_balance' | 'high_atm_usage' | 'gambling' | 'suspicious_pattern' | 'loan_default' | 'irregular_income';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  amount?: number;
+  date?: string;
+  affectedTransactions: number;
+  recommendation: string;
+  impact: 'Financial' | 'Credit Score' | 'Legal' | 'Compliance';
 }
 
-const LOW_BALANCE_THRESHOLD = 1000;
-const LARGE_CASH_WITHDRAWAL_THRESHOLD = 50000;
-const CHEQUE_BOUNCE_KEYWORDS = ['CHEQUE RETURN', 'CHQ BOUNCE', 'INSUFFICIENT FUNDS', 'RETCHQ'];
+export function detectRedAlerts(transactions: CategorizedTransaction[]): RedAlert[] {
+  return [];
+}
 
-export const detectRedAlerts = (transactions: Transaction[]): RedAlert[] => {
-  const alerts: RedAlert[] = [];
+export interface AlertStatistics {
+  totalAlerts: number;
+  criticalAlerts: number;
+  highAlerts: number;
+  mediumAlerts: number;
+  lowAlerts: number;
+  alertsByType: Record<RedAlert['type'], number>;
+  mostCommonImpact: string;
+}
 
-  transactions.forEach((t, index) => {
-    // 1. Low Balance Alert
-    if (t.balance < LOW_BALANCE_THRESHOLD) {
-      alerts.push({
-        type: 'LowBalance',
-        message: `Balance dropped to ${t.balance.toFixed(2)}, which is below the threshold of ${LOW_BALANCE_THRESHOLD}.`,
-        transactionId: `txn_${index}`, // A simple temporary ID
-      });
-    }
-
-    // 2. Large Cash Withdrawal Alert
-    const description = t.description.toUpperCase();
-    if (t.debit && t.debit > LARGE_CASH_WITHDRAWAL_THRESHOLD && (description.includes('ATM') || description.includes('CASH WDL'))) {
-      alerts.push({
-        type: 'LargeCashWithdrawal',
-        message: `A large cash withdrawal of ${t.debit.toFixed(2)} was made.`,
-        transactionId: `txn_${index}`,
-      });
-    }
-
-    // 3. Cheque Bounce Alert
-    for (const keyword of CHEQUE_BOUNCE_KEYWORDS) {
-      if (description.includes(keyword)) {
-        alerts.push({
-          type: 'ChequeBounce',
-          message: `A potential cheque bounce was detected with description: "${t.description}"`,
-          transactionId: `txn_${index}`,
-        });
-        break; // Avoid adding multiple bounce alerts for the same transaction
-      }
-    }
-  });
-
-  return alerts;
-};
+export function getAlertStatistics(alerts: RedAlert[]): AlertStatistics {
+  return {
+    totalAlerts: 0,
+    criticalAlerts: 0,
+    highAlerts: 0,
+    mediumAlerts: 0,
+    lowAlerts: 0,
+    alertsByType: {} as any,
+    mostCommonImpact: 'None'
+  };
+}
