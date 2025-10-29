@@ -51,7 +51,7 @@ SELECT
   (ARRAY['HDFC Bank','State Bank of India','ICICI Bank','Axis Bank','Kotak Mahindra Bank','Yes Bank'])[ (i % 6) + 1 ],
   concat('IN', floor(random()*1e10)::bigint + 1000000000),
   format('Sample Holder %s', i),
-  (ARRAY['Savings','Checking'])[ (i % 2) + 1 ],
+  (ARRAY['savings','current'])[ (i % 2) + 1 ],
   now() - (i || ' days')::interval
 FROM generate_series(1,60) AS s(i), first_user fu;
 

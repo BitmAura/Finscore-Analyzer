@@ -1,1 +1,0 @@
-ALTER TABLE analysis_jobs ADD COLUMN ai_executive_summary TEXT;

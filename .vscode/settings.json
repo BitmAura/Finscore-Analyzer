@@ -1,45 +1,67 @@
 {
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
   "chat.mcp.servers": {
     "java-modernization": {
-      "command": "node",
       "args": [
         "${workspaceFolder}/mcp-java-modernization/dist/index.js"
-      ]
+      ],
+      "command": "node"
     }
   },
-  "css.validate": false,
-  "scss.validate": false,
-  "less.validate": false,
   "css.lint.unknownAtRules": "ignore",
+  "css.validate": false,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "java.compile.nullAnalysis.mode": "automatic",
+  "less.validate": false,
+  "scss.validate": false,
+  "sqltools.connections": [
+    {
+      "askForPassword": true,
+      "connectionTimeout": 10,
+      "database": "finscore_db",
+      "driver": "PostgreSQL",
+      "name": "FinScore PostgreSQL",
+      "port": 5432,
+      "previewLimit": 50,
+      "server": "localhost",
+      "username": "postgres"
+    },
+    {
+      "connectionTimeout": 10,
+      "database": "finscore_db",
+      "driver": "PostgreSQL",
+      "name": "FinScore Docker PostgreSQL",
+      "password": "postgres",
+      "port": 5432,
+      "previewLimit": 50,
+      "server": "localhost",
+      "username": "postgres"
+    }
+  ],
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.experimental.configFile": "tailwind.config.js",
   "tailwindCSS.includeLanguages": {
     "plaintext": "css",
     "postcss": "css"
-  },
-  "tailwindCSS.emmetCompletions": true,
-  "tailwindCSS.experimental.configFile": "tailwind.config.js",
-  "sqltools.connections": [
-    {
-      "name": "FinScore PostgreSQL",
-      "driver": "PostgreSQL",
-      "previewLimit": 50,
-      "server": "localhost",
-      "port": 5432,
-      "database": "finscore_db",
-      "username": "postgres",
-      "askForPassword": true,
-      "connectionTimeout": 10
-    },
-    {
-      "name": "FinScore Docker PostgreSQL",
-      "driver": "PostgreSQL",
-      "previewLimit": 50,
-      "server": "localhost",
-      "port": 5432,
-      "database": "finscore_db",
-      "username": "postgres",
-      "password": "postgres",
-      "connectionTimeout": 10
-    }
-  ],
-  "java.compile.nullAnalysis.mode": "automatic"
+  }
 }
