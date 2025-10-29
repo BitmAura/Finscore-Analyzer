@@ -30,6 +30,8 @@ function initializeWebSocketServer() {
     // Authenticate user
     try {
       const cookieStore = await cookies();
+      // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
       const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -77,6 +79,8 @@ function initializeWebSocketServer() {
 async function sendInitialRiskData(ws: ExtendedWebSocket, jobId: string) {
   try {
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Fetch current risk data

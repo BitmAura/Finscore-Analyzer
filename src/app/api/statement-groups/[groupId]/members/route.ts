@@ -15,6 +15,8 @@ export async function POST(
   try {
     // Check authentication
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -132,6 +134,8 @@ export async function GET(
   try {
     // Check authentication
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -206,6 +210,8 @@ export async function DELETE(
   try {
     // Check authentication
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();

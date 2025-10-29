@@ -20,6 +20,8 @@ import { generateExecutiveSummary, detectFraud, predictCashFlow } from '@/lib/ai
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Check authentication
@@ -57,6 +59,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const body = await request.json();

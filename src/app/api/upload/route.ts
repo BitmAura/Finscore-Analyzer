@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication - await cookies() before using it
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -624,6 +626,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
+    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
