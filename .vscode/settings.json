@@ -63,5 +63,6 @@
   "tailwindCSS.includeLanguages": {
     "plaintext": "css",
     "postcss": "css"
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
