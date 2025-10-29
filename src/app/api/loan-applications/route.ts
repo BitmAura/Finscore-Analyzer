@@ -11,7 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 // GET /api/loan-applications - List all applications
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -92,7 +93,8 @@ export async function GET(request: NextRequest) {
 // POST /api/loan-applications - Create new application
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.getUser();
 

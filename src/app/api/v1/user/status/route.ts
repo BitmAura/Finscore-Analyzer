@@ -4,10 +4,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
-
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const cookieStore = cookies();    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 

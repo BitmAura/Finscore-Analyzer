@@ -13,8 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const cookieStore = cookies();
+  // Supabase client
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -61,8 +62,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const cookieStore = cookies();
+  // Supabase client
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -137,8 +139,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const cookieStore = cookies();
+  // Supabase client
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const { newPassword } = await request.json();
     
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     if (!newPassword || newPassword.length < 8) {

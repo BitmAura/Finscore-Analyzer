@@ -10,7 +10,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ tra
     return new NextResponse(JSON.stringify({ error: 'Missing transactionId or category' }), { status: 400 });
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   try {

@@ -13,11 +13,9 @@ export async function POST(
   { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
-
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+// Check authentication
+const cookieStore = cookies();
+const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -131,14 +129,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ groupId: string }> }
 ) {
-  try {
-    // Check authentication
-    const cookieStore = await cookies();
-    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
+try {
+  // Check authentication
+  const cookieStore = cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-
-    const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
       return NextResponse.json(
@@ -209,10 +205,7 @@ export async function DELETE(
 ) {
   try {
     // Check authentication
-    const cookieStore = await cookies();
-    // @ts-expect-error - cookieStore is already awaited, type mismatch is expected
-
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const cookieStore = cookies();    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
 

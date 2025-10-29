@@ -9,8 +9,8 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     try {
-      const cookieStore = await cookies();
-      const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+const cookieStore = cookies();
+const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
       await supabase.auth.exchangeCodeForSession(code);
     } catch (error) {
       console.error('Auth callback error:', error);

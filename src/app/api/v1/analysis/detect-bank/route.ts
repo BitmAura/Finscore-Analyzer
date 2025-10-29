@@ -116,7 +116,8 @@ function detectAccountType(text: string): string {
 // Main API handler
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
+
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();

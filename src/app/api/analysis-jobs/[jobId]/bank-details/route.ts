@@ -16,7 +16,7 @@ export async function POST(
     const { jobId } = await params;
 
     // Check authentication - await cookies() before using it
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     const { data: { session } } = await supabase.auth.getSession();
